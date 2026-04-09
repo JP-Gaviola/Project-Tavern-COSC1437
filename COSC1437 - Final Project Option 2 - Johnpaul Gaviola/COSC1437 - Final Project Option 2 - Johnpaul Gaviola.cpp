@@ -3,29 +3,26 @@
 
 #include <iostream>
 #include <string>
-#include <stdlib.h>     //for using the function sleep
+#include "DialougeClass.h"
+
 using namespace std;
 
-
-//Writes dialouge to iostream one at a time 
-void writeDialouge(string inpText, bool keyContinue)
-{
-    cout << inpText << endl;
-    if (keyContinue) { system("pause");}
-}
 
 int main()
 {
     //Intro sequence... for main menu 
+    //Create a newDialouge object
+    Dialouge diaObj;
+
 
     //Will make a class file solely for dialouge soon...
     string introText1 = "The morning sun strikes through your window. Landing itself on not only the floor, but grazing your closed eyes, just enough to bring you out of your deep slumber.";
     string introText2 = "You step out of your bed, and head to the restroom to freshenup...";
     string introText3 = "Time to get ready for another day in the Saderan Empire's most popular tavern, 'Happy Hour'.";
 
-    writeDialouge(introText1, true);
-    writeDialouge(introText2, true);
-    writeDialouge(introText3, true);
+    diaObj.writeDialouge(introText1, true);
+    diaObj.writeDialouge(introText2, true);
+    diaObj.writeDialouge(introText3, true);
 
     cout << "test" << endl;
     
