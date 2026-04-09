@@ -27,6 +27,7 @@ int main()
     writeDialouge(introText2, true);
     writeDialouge(introText3, true);
 
+    cout << "test" << endl;
     
 
     return 0;
