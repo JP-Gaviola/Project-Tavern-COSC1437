@@ -13,16 +13,15 @@ int main()
     //Intro sequence... for main menu 
     //Create a newDialouge object
     Dialouge diaObj;
+    diaObj.loadDialouge("menuDialouge.txt");
 
+    diaObj.printLogo();
 
-    //Will make a class file solely for dialouge soon...
-    string introText1 = "The morning sun strikes through your window. Landing itself on not only the floor, but grazing your closed eyes, just enough to bring you out of your deep slumber.";
-    string introText2 = "You step out of your bed, and head to the restroom to freshenup...";
-    string introText3 = "Time to get ready for another day in the Saderan Empire's most popular tavern, 'Happy Hour'.";
+    diaObj.writeDialouge(3, false);
+    diaObj.writeDialouge(2, false);
+    diaObj.writeDialouge(1, false);
 
-    diaObj.writeDialouge(introText1, true);
-    diaObj.writeDialouge(introText2, true);
-    diaObj.writeDialouge(introText3, true);
+    
 
     cout << "test" << endl;
     

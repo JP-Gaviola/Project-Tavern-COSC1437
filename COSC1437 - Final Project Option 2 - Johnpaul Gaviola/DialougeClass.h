@@ -6,11 +6,13 @@ using namespace std;
 class Dialouge
 {
 	public:
-		void writeDialouge(string inpText, bool keyContinue); //Writes dialouge 
-};
+		~Dialouge(); //frees memory from dia table
 
-void Dialouge::writeDialouge(string inpText, bool keyContinue)
-{
-	cout << inpText << endl;
-	if (keyContinue) { system("pause"); }
-}
+		bool loadDialouge(string); //loads a dialouge data to this object's dia
+		void writeDialouge(int diaLine, bool keyContinue); //Writes dialouge 
+		void printLogo(); //Prints logo of the game
+
+	private:
+		string* diaData[];
+		
+};

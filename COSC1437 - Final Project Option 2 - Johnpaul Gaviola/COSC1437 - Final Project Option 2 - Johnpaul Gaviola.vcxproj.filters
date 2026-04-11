@@ -18,10 +18,18 @@
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DialougeClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="menuDialouge.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

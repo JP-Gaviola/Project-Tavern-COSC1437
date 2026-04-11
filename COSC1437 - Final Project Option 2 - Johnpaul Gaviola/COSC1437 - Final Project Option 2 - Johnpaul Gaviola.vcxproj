@@ -128,9 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp" />
+    <ClCompile Include="DialougeClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="menuDialouge.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
