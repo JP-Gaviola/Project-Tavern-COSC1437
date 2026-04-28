@@ -129,10 +129,15 @@
   <ItemGroup>
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp" />
     <ClCompile Include="DialougeClass.cpp" />
+    <ClCompile Include="GameStats.cpp" />
+    <ClCompile Include="GameStats.h" />
+    <ClCompile Include="PlayerStats.cpp" />
+    <ClCompile Include="TimeClass.cpp" />
+    <ClCompile Include="TimeClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h" />
-    <ClInclude Include="PlayerClass.h" />
+    <ClInclude Include="PlayerStats.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
