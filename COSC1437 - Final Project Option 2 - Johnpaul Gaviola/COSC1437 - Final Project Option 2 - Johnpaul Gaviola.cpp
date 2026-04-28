@@ -3,7 +3,17 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <ostream>
+#include <sstream>
+
 #include "DialougeClass.h"
+#include "GameStats.h"
+#include "PlayerStats.h"
+#include "TimeClass.h"
+#include "Water.h";
+
+
 
 using namespace std;
 
@@ -13,17 +23,50 @@ int main()
     //Menu sequence////////////////////////////////////////////////////////////////////
     string userChoice = "";
     Dialouge diaObj;
+    bool loadgame = false;
 
     diaObj.printLogo();
     diaObj.writeDialouge("The Saderan Empire's finest tavern awaits you!", false);
     diaObj.writeDialouge("Options: New Game / Load Game / Exit", false);
 
-    //Get us
-    while (userChoice != "Exit")
+    
+    while (userChoice != "HoshinoIchika1289189274891274812740127102957124")
     {
         diaObj.askUserChoice(userChoice);
 
+        if (userChoice == "New Game")
+        {
+            break;
+        }
+        else if (userChoice == "Load Game")
+        {
+            //Do later, when we have saving
+            loadgame = true;
+            break;
+        }
+        else if (userChoice == "Exit")
+        {
+            diaObj.writeDialouge("See you next time!", false);
+            return 0;
+        }
+
     }
+
+    //Creating game elements
+    //Can add loading text later
+    //Objects
+    GameStats gameStats;
+    PlayerStats playerStats;
+
+    if (loadgame)
+    {
+        //Load objects respectively
+    }
+
+    //cout << gameStats.getDay();
+    //lets assume we're making a drink
+    // Water newDrink;
+    // cout << newDrink.prepareItem() << endl;
 
 
     return 0;

@@ -131,13 +131,18 @@
     <ClCompile Include="DialougeClass.cpp" />
     <ClCompile Include="GameStats.cpp" />
     <ClCompile Include="GameStats.h" />
+    <ClCompile Include="OrderItem.cpp" />
     <ClCompile Include="PlayerStats.cpp" />
+    <ClCompile Include="TavernMain.cpp" />
     <ClCompile Include="TimeClass.cpp" />
     <ClCompile Include="TimeClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h" />
+    <ClInclude Include="OrderItem.h" />
     <ClInclude Include="PlayerStats.h" />
+    <ClInclude Include="TavernMain.h" />
+    <ClInclude Include="Water.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

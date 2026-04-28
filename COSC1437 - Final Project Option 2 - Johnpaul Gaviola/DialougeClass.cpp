@@ -37,5 +37,5 @@ void Dialouge::writeDialouge(string dia, bool keyContinue)
 void Dialouge::askUserChoice(string& choiceVar)
 {
     cout << "Enter Choice:";
-    cin >> choiceVar;
+    getline(cin, choiceVar);
 }
