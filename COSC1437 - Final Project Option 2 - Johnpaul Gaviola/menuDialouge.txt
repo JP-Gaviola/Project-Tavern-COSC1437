@@ -1,3 +1,0 @@
-Options: 'New Game' / 'Load Game'
-Highest Income:
-The Saderan Empire's finest tavern awaits you!

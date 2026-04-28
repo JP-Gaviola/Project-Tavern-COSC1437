@@ -10,21 +10,21 @@ using namespace std;
 
 int main()
 {
-    //Intro sequence... for main menu 
-    //Create a newDialouge object
+    //Menu sequence////////////////////////////////////////////////////////////////////
+    string userChoice = "";
     Dialouge diaObj;
-    diaObj.loadDialouge("menuDialouge.txt");
 
     diaObj.printLogo();
+    diaObj.writeDialouge("The Saderan Empire's finest tavern awaits you!", false);
+    diaObj.writeDialouge("Options: New Game / Load Game / Exit", false);
 
-    diaObj.writeDialouge(3, false);
-    diaObj.writeDialouge(2, false);
-    diaObj.writeDialouge(1, false);
+    //Get us
+    while (userChoice != "Exit")
+    {
+        diaObj.askUserChoice(userChoice);
 
-    
+    }
 
-    cout << "test" << endl;
-    
 
     return 0;
 } 

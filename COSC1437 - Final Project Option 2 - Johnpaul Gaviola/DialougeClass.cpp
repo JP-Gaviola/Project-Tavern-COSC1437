@@ -4,53 +4,8 @@
 using namespace std;
 
 #include "DialougeClass.h"
+#include <thread> // standard C++11
 
-Dialouge::~Dialouge()
-{
-    delete[] diaData;
-}
-
-bool Dialouge::loadDialouge(string filename)
-{
-    int counter = 0;
-    //load all dialogue files
-    ifstream rEADER;
-   
-
-    //First read line amount 
-    rEADER.open(filename);
-    if (rEADER.is_open() && rEADER.good())
-    {
-        string tempstring;
-        while (getline(rEADER, tempstring))
-        {
-            counter++;
-        }
-    }
-    else{return false;}
-    
-    rEADER.close();
-
-    //reopen to load into array 
-    string* newArray = new string[counter];
-    counter = 0;
-
-    //reopen and load data
-    rEADER.open(filename);
-
-    if (rEADER.is_open() && rEADER.good())
-    {
-        while (getline(rEADER, newArray[counter]))
-        {
-            counter++;
-        }
-    }
-    else { cout << "2nd check failed" << endl; return false; }
-
-    //delete[] diaData;
-    *diaData = newArray;
-    return true;
-}
 
 void Dialouge::printLogo()
 {
@@ -68,8 +23,19 @@ void Dialouge::printLogo()
                      \$$       \$$        \$$$$$$                                               )" << endl;
 }
 
-void Dialouge::writeDialouge(int diaLine, bool keyContinue)
+void Dialouge::writeDialouge(string dia, bool keyContinue)
 {
-	cout << diaData[diaLine] << endl;
+    for (int i = 0; i < dia.size(); i++)
+    {
+        cout << dia.at(i) << flush;
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+	cout << endl;
 	if (keyContinue) { system("pause"); }
+}
+
+void Dialouge::askUserChoice(string& choiceVar)
+{
+    cout << "Enter Choice:";
+    cin >> choiceVar;
 }

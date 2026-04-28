@@ -132,9 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="menuDialouge.txt" />
+    <ClInclude Include="PlayerClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
