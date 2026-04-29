@@ -6,16 +6,66 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
+#include <thread>
+#include <chrono>
 
 #include "DialougeClass.h"
 #include "GameStats.h"
 #include "PlayerStats.h"
 #include "TimeClass.h"
-#include "Water.h";
-
+#include "Water.h"
 
 
 using namespace std;
+
+int generateQuota(int day)
+{
+    int baseQuota = (day * 10) + 20;
+    return (baseQuota) + (baseQuota * 0.5);
+}
+
+string getTime(TimeClass& timeClass)
+{
+    string timeTemp = "";
+    timeTemp += to_string(timeClass.Hour) + ":";
+    if (timeClass.Min == 0)
+    {
+        timeTemp += "00";
+    }
+    else if (timeClass.Min < 10 && timeClass.Min > 0)
+    {
+        timeTemp += "0" + to_string(timeClass.Min);
+    }
+    else
+    {
+        timeTemp += to_string(timeClass.Min);
+    }
+
+    return timeTemp;
+}
+
+void endTime(TimeClass& timeClass, thread& t1)
+{
+    timeClass.timeActive = false;
+    timeClass.Hour = 9;
+    timeClass.Min = 0;
+    t1.detach();
+}
+
+void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, TimeClass& timeClass)
+{
+    diaObj.writeDialouge("////////////////Game Stats///////////////////", false, false);
+    diaObj.writeDialouge("Current Earnings: " + to_string(gameStats->getEarnings()), false, false);
+    diaObj.writeDialouge("Quota: " + to_string(gameStats->getQuota()), false, false);
+    diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
+    diaObj.writeDialouge("Happy Hour: " + to_string(gameStats->checkHappyHour()), false, false);
+    diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
+    diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
+    diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
+    diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
+    diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
+    
+}
 
 
 int main()
@@ -26,11 +76,10 @@ int main()
     bool loadgame = false;
 
     diaObj.printLogo();
-    diaObj.writeDialouge("The Saderan Empire's finest tavern awaits you!", false);
-    diaObj.writeDialouge("Options: New Game / Load Game / Exit", false);
+    diaObj.writeDialouge("The Saderan Empire's finest tavern awaits you!", false, true);
+    diaObj.writeDialouge("Options: New Game / Load Game / Exit", false, true);
 
-    
-    while (userChoice != "HoshinoIchika1289189274891274812740127102957124")
+    do
     {
         diaObj.askUserChoice(userChoice);
 
@@ -46,21 +95,60 @@ int main()
         }
         else if (userChoice == "Exit")
         {
-            diaObj.writeDialouge("See you next time!", false);
+            diaObj.writeDialouge("See you next time!", false, true);
             return 0;
         }
-
-    }
+    } while (userChoice != "Exit");
 
     //Creating game elements
     //Can add loading text later
     //Objects
-    GameStats gameStats;
-    PlayerStats playerStats;
+    GameStats* gameStats = nullptr;
+    PlayerStats* playerStats = nullptr;
+    TimeClass timeClass;
 
     if (loadgame)
     {
         //Load objects respectively
+
+    }
+    else
+    {
+        //New game
+        gameStats = new GameStats;
+        playerStats = new PlayerStats;
+    }
+    //Load game objects
+    int gameResult = -1;
+
+    //Start the game!
+
+    if (gameStats->getDay() == 0)
+    {
+        //Intro sequence
+        //New game
+        
+        diaObj.writeDialouge("Blahblah intro sequence", false, true);
+    }
+    else
+    {
+        //loaded game
+    }
+    gameStats->setQuota(generateQuota(gameStats->getDay()));
+
+    
+    //Gameplay loop starts!
+    diaObj.writeDialouge("You finish final preparations, all you need to do now is flip the open sign...", true, true);
+    diaObj.writeDialouge("Let's do this!", false, true);
+    printStatus(diaObj, gameStats, playerStats, timeClass);
+
+    thread t1(&TimeClass::startTime, &timeClass);
+    
+
+    //Gameplay loop 
+    while (timeClass.reachedEnd == false)
+    {
+        //Main game! 
     }
 
     //cout << gameStats.getDay();
@@ -68,17 +156,9 @@ int main()
     // Water newDrink;
     // cout << newDrink.prepareItem() << endl;
 
-
+    delete playerStats;
+    delete gameStats;
+    endTime(timeClass, t1);
     return 0;
 } 
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

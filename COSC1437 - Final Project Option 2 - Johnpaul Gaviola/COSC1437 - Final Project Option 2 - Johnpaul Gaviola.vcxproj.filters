@@ -13,23 +13,60 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ImplementationFiles">
+      <UniqueIdentifier>{6999e9df-79d7-4369-a2d7-908550571886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OrderItems">
+      <UniqueIdentifier>{5188987a-0aa9-43dc-9d2d-542bc8ab62af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OrderItems\Food">
+      <UniqueIdentifier>{f1fbc1de-a06b-4bc9-81eb-1f54b89cbe8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OrderItems\Drinl">
+      <UniqueIdentifier>{f1dee515-872a-425a-9532-a00d5f1d323b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameStats.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeClass.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
     <ClCompile Include="DialougeClass.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImplementationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStats.cpp">
+      <Filter>ImplementationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="OrderItem.cpp">
+      <Filter>ImplementationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerStats.cpp">
+      <Filter>ImplementationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeClass.cpp">
+      <Filter>ImplementationFiles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="menuDialouge.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
+    <ClInclude Include="OrderItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TavernMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Water.h">
+      <Filter>OrderItems\Drinl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

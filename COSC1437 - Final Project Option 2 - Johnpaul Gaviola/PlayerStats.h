@@ -19,8 +19,8 @@ public:
 	int getProf();
 
 private:
-	int Exp;
-	int Gold;
-	int Reputation;
-	int Proficiency;
+	int Exp; //For getting the ability to buy new stock
+	int Gold; //money
+	int Reputation; //serving high profile customers 
+	int Proficiency; //Faster / easier prep work
 };

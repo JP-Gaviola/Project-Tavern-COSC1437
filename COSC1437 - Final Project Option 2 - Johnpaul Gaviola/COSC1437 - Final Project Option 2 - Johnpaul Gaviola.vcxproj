@@ -133,7 +133,6 @@
     <ClCompile Include="GameStats.h" />
     <ClCompile Include="OrderItem.cpp" />
     <ClCompile Include="PlayerStats.cpp" />
-    <ClCompile Include="TavernMain.cpp" />
     <ClCompile Include="TimeClass.cpp" />
     <ClCompile Include="TimeClass.h" />
   </ItemGroup>

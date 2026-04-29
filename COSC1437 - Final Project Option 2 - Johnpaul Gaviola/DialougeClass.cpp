@@ -23,14 +23,22 @@ void Dialouge::printLogo()
                      \$$       \$$        \$$$$$$                                               )" << endl;
 }
 
-void Dialouge::writeDialouge(string dia, bool keyContinue)
+void Dialouge::writeDialouge(string dia, bool keyContinue, bool oneAtATime)
 {
-    for (int i = 0; i < dia.size(); i++)
+    if (oneAtATime)
     {
-        cout << dia.at(i) << flush;
-        this_thread::sleep_for(chrono::milliseconds(10));
+        for (int i = 0; i < dia.size(); i++)
+        {
+            cout << dia.at(i) << flush;
+            this_thread::sleep_for(chrono::milliseconds(10));
+        }
+        cout << endl;
     }
-	cout << endl;
+    else
+    {
+        cout << dia << endl;
+    }
+    
 	if (keyContinue) { system("pause"); }
 }
 
