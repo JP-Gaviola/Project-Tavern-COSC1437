@@ -19,13 +19,13 @@ void TimeClass::startTime()
 	timeActive = true;
 	while (timeActive)
 	{
-		if (Hour == 21)
+		if (Hour >= 21)
 		{
 			reachedEnd = true;
 			break;
 		}
 
-		if ((Min += 1) == 60)
+		if ((Min += 1) >= 60)
 		{
 			Hour += 1;
 			Min = 0;

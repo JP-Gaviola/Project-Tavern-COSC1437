@@ -6,22 +6,22 @@ using namespace std;
 class OrderItem {
 
 protected:
-	string itemtype; //Either a food or drink 
 	string itemName; //Name of item used to check if it was in the order
 	int itemScore;
 	int stock;
+	int ExpNeeded;
+	int cost;
 
 public:
-	virtual int prepareItem() = 0; //override this 
+	virtual void prepareItem() = 0; //override this 
 
 	int getItemScore();
 	int getStock();
-	string getType();
 	string getName();
+	int getExpNeeded();
+	int getCost();
 
 
-	void setType(string);
-	void setName(string);
 	void setItemScore(int);
 	void setStock(int);
 	//Code the custom minigame here and return a score to be graded 

@@ -25,6 +25,9 @@
     <Filter Include="OrderItems\Drinl">
       <UniqueIdentifier>{f1dee515-872a-425a-9532-a00d5f1d323b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Customers">
+      <UniqueIdentifier>{16ee10e1-dfae-4138-bd0f-590fe4a3f545}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp">
@@ -51,6 +54,12 @@
     <ClCompile Include="TimeClass.cpp">
       <Filter>ImplementationFiles</Filter>
     </ClCompile>
+    <ClCompile Include="Customer.cpp">
+      <Filter>ImplementationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="TownResident.h">
+      <Filter>Customers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h">
@@ -67,6 +76,21 @@
     </ClInclude>
     <ClInclude Include="Water.h">
       <Filter>OrderItems\Drinl</Filter>
+    </ClInclude>
+    <ClInclude Include="Customer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ElapsedTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bread.h">
+      <Filter>OrderItems\Food</Filter>
+    </ClInclude>
+    <ClInclude Include="Ingis.h">
+      <Filter>Customers</Filter>
+    </ClInclude>
+    <ClInclude Include="Fish.h">
+      <Filter>OrderItems\Food</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

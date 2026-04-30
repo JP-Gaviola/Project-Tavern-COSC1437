@@ -23,4 +23,5 @@ private:
 	int Gold; //money
 	int Reputation; //serving high profile customers 
 	int Proficiency; //Faster / easier prep work
+	//Maybe move stock to here 
 };

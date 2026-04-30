@@ -8,12 +8,27 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <cstdlib>
+#include <ctime>   
 
 #include "DialougeClass.h"
 #include "GameStats.h"
 #include "PlayerStats.h"
 #include "TimeClass.h"
+#include "ElapsedTime.h"
+
+
+///Order Items
+#include "OrderItem.h"
 #include "Water.h"
+#include "Bread.h"
+#include "Fish.h"
+
+///Customers
+#include "Customer.h"
+#include "TownResident.h"
+#include "Ingis.h"
 
 
 using namespace std;
@@ -67,6 +82,142 @@ void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStat
     
 }
 
+void selectRandomCustomer(Customer*& baseCust, int playerRep)
+{
+    if (baseCust != nullptr) { delete baseCust; baseCust = nullptr; }
+
+        //Math rand with seed on current system time 
+        srand(time(0));
+
+        int randomNum = std::rand() % 2 + 1; //1 to 2
+
+        switch (randomNum) {
+        case 1:
+            baseCust = new TownResident;
+            break;
+        case 2:
+            baseCust = new Ingis;
+            break;
+        }
+   
+}
+
+OrderItem* stringToOrderItem(string inp)
+{
+    OrderItem* newItem = nullptr;
+    if (inp == "Water")
+    {
+        newItem = new Water;
+    }
+    else if (inp == "Bread")
+    {
+        newItem = new Bread;
+    }
+    else if (inp == "Fish")
+    {
+        newItem = new Fish;
+        
+    }
+    return newItem;
+}
+
+void createOrder(Customer*& currCustomer, int playerExp, vector<OrderItem*>& order)
+{
+    int PrefCosts = 0;
+    int budget = currCustomer->getBudget();
+    //Add preferences first if they pass the exp check 
+    for (int i = 0; i < currCustomer->getPrefSize(); i++)
+    {
+        OrderItem* currentItem = stringToOrderItem(currCustomer->getPrefAt(i));
+        
+        if (currentItem->getExpNeeded() <= playerExp)
+        {
+            
+            
+            PrefCosts += currentItem->getCost();
+            
+            order.push_back(currentItem);
+        }
+    }
+    budget -= PrefCosts;
+    //cout << "Customer Budget: " << budget << endl;
+    //cout << "Test : " << order[0]->getName() << endl;
+
+
+
+    //ADDLATER Add one random item if to order if not strictly preferences / exp req is met 
+    if (currCustomer->getOnlyPref() == false)
+    {
+
+    }
+}
+
+void askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass)
+{
+    int i;
+    string prepped = "";
+    string diaChoiceLocal;
+    
+    do
+    {
+        prepped = "";
+        for (i = 0; i < prepOrder.size(); i++)
+        {
+            prepped += prepOrder[i]->getName() + " R: " + to_string(prepOrder[i]->getItemScore()) + " | ";
+        }
+
+        diaObj.writeDialouge("//////////////PREP///////////////", false, false);
+        diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
+        diaObj.writeDialouge("Currently Prepped: " + prepped, false, true);
+        diaObj.writeDialouge("What item would you like to prepare/do?", false, true);
+        diaObj.writeDialouge("Water - Bread - Fish(E:10) - Cake - Meat - Submit Order - Remove Item", false, false);
+
+        diaObj.askUserChoice(diaChoiceLocal);
+        if (diaChoiceLocal == "Water")
+        {
+            //check stock later move it to player stats
+            //Stock check passed
+            Water* tempWater = new Water;
+            tempWater->prepareItem();
+            prepOrder.push_back(tempWater);
+        }
+        else if (diaChoiceLocal == "Bread")
+        {
+            Bread* tempBread = new Bread;
+            tempBread->prepareItem();
+            prepOrder.push_back(tempBread);
+        }
+        else if (diaChoiceLocal == "Fish")
+        {
+            Fish tempFish;
+            if (playerStats->getExp() > tempFish.getExpNeeded())
+            {
+
+            }
+            else
+            {
+                diaObj.writeDialouge("Not Enough Experience!", false, true);
+            }
+        }
+        else if (diaChoiceLocal == "Remove Item")
+        {
+            diaObj.writeDialouge("What number item would you like to remove? (0,1,2,3...)", false, true);
+            diaObj.writeDialouge("Currently Prepped: " + prepped, false, true);
+            diaObj.askUserChoice(diaChoiceLocal);
+            int converted = stoi(diaChoiceLocal);
+            if (converted >= 0 && converted < prepOrder.size())
+            {
+                swap(prepOrder[converted], prepOrder.back());
+                prepOrder.pop_back();
+            }
+            else
+            {
+                diaObj.writeDialouge("Invalid - No items removed.", false, true);
+            }
+        }
+    } while (diaChoiceLocal != "Submit Order");
+    
+}
 
 int main()
 {
@@ -106,6 +257,7 @@ int main()
     GameStats* gameStats = nullptr;
     PlayerStats* playerStats = nullptr;
     TimeClass timeClass;
+    string diaChoiceMain;
 
     if (loadgame)
     {
@@ -135,7 +287,10 @@ int main()
         //loaded game
     }
     gameStats->setQuota(generateQuota(gameStats->getDay()));
-
+    //Gameplay Elements
+    vector<OrderItem*> currentOrder;
+    vector<OrderItem*> currentPrep;
+    
     
     //Gameplay loop starts!
     diaObj.writeDialouge("You finish final preparations, all you need to do now is flip the open sign...", true, true);
@@ -146,10 +301,82 @@ int main()
     
 
     //Gameplay loop 
-    while (timeClass.reachedEnd == false)
+    while (gameResult == -1) //Only continue if time isnt 21
     {
+        
         //Main game! 
+        while (timeClass.reachedEnd == false)
+        {
+           
+            //FIXME: add random customer picker later 
+            Customer* currCustomer = nullptr;
+            
+            selectRandomCustomer(currCustomer, playerStats->getRep());
+             
+            diaObj.writeDialouge("The Tavern door swings open...", false, true);
+
+            diaObj.writeDialouge("CUSTOMER: " + currCustomer->getName(), false, true);
+            diaObj.writeDialouge(currCustomer->getDEnter(), false, true);
+
+            if (playerStats->getRep() > currCustomer->getMinRep())
+            {
+                diaObj.writeDialouge("Take their order? | Yes, No", false, true);
+                do
+                {
+                    diaObj.askUserChoice(diaChoiceMain);
+                    if (diaChoiceMain == "No")
+                    {
+                        diaObj.writeDialouge(currCustomer->getDdeclined(), false, true);
+                        break;
+                    }
+                } while (diaChoiceMain != "Yes");
+            }
+            else
+            {
+                diaObj.writeDialouge(currCustomer->getDrepTooLow(), false, true);
+                diaObj.writeDialouge("Reputation is too low to serve this customer!", false, true);
+                continue;
+            }
+            if (diaChoiceMain == "No") { continue; }
+           
+            createOrder(currCustomer, playerStats->getExp(), currentOrder);
+            //Ordering sequence!!
+            diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
+            diaObj.writeDialouge(currCustomer->getDstartOrder(), false, true);
+            diaObj.writeDialouge("///////////ORDER///////////", false, false);
+            for (int i = 0; i < currentOrder.size(); i++)
+            {
+                
+                diaObj.writeDialouge(currentOrder[i]->getName(), false, true);
+            }
+            diaObj.writeDialouge("///////////ORDER///////////", false, false);
+
+            askSelectOrder(diaObj, gameStats, playerStats, currentPrep, timeClass);
+
+            diaObj.writeDialouge(currCustomer->getDsubmitOrder(), false, false);
+
+            //Grade order 
+
+            int custGrade = 0;
+
+            //FIXME TOMORROW, add rating system check calandar for next
+
+            
+        }
+
+
+        //Day ended!!
+        if (gameResult == 1)
+        {
+            //Passed quota
+        }
+        else if (gameResult == 2)
+        {
+            //failed
+        }
     }
+    
+
 
     //cout << gameStats.getDay();
     //lets assume we're making a drink
