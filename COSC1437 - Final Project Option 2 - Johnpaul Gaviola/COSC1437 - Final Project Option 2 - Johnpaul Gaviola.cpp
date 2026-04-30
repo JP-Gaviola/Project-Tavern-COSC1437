@@ -17,6 +17,7 @@
 #include "PlayerStats.h"
 #include "TimeClass.h"
 #include "ElapsedTime.h"
+#include "CustomerTimer.h"
 
 
 ///Order Items
@@ -35,7 +36,7 @@ using namespace std;
 
 int generateQuota(int day)
 {
-    int baseQuota = (day * 10) + 20;
+    int baseQuota = (day * 10) + 50;
     return (baseQuota) + (baseQuota * 0.5);
 }
 
@@ -72,6 +73,7 @@ void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStat
     diaObj.writeDialouge("////////////////Game Stats///////////////////", false, false);
     diaObj.writeDialouge("Current Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Quota: " + to_string(gameStats->getQuota()), false, false);
+    diaObj.writeDialouge("Today's Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
     diaObj.writeDialouge("Happy Hour: " + to_string(gameStats->checkHappyHour()), false, false);
     diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
@@ -80,6 +82,17 @@ void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStat
     diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
     diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
     
+}
+
+void printOrder(Dialouge& diaObj ,vector<OrderItem*> currentOrder)
+{
+    diaObj.writeDialouge("///////////ORDER///////////", false, false);
+    for (int i = 0; i < currentOrder.size(); i++)
+    {
+
+        diaObj.writeDialouge(currentOrder[i]->getName(), false, true);
+    }
+    diaObj.writeDialouge("///////////ORDER///////////", false, false);
 }
 
 void selectRandomCustomer(Customer*& baseCust, int playerRep)
@@ -152,7 +165,34 @@ void createOrder(Customer*& currCustomer, int playerExp, vector<OrderItem*>& ord
     }
 }
 
-void askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass)
+//Two functions to help with grading order
+double scoreItem(double keyVal, double subVal) {
+    if (keyVal == 0) return 0;
+
+    double error = abs(keyVal - subVal) / keyVal;
+    double score = 100 * (1 - error);
+
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+
+    return score;
+}
+
+
+
+
+int findIndex(const vector<OrderItem*>& table, string name) {
+    for (int i = 0; i < table.size(); i++) {
+        if (table[i]->getName() == name) {
+            return i;
+        }
+    }
+    return -1; // not found
+}
+
+
+
+int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass, vector<OrderItem*> currentOrder)
 {
     int i;
     string prepped = "";
@@ -160,6 +200,7 @@ void askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerS
     
     do
     {
+        
         prepped = "";
         for (i = 0; i < prepOrder.size(); i++)
         {
@@ -170,7 +211,7 @@ void askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerS
         diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
         diaObj.writeDialouge("Currently Prepped: " + prepped, false, true);
         diaObj.writeDialouge("What item would you like to prepare/do?", false, true);
-        diaObj.writeDialouge("Water - Bread - Fish(E:10) - Cake - Meat - Submit Order - Remove Item", false, false);
+        diaObj.writeDialouge("Water - Bread - Fish(E:10) - Cake - Meat - Submit Order - Remove Item - View Ticket", false, false);
 
         diaObj.askUserChoice(diaChoiceLocal);
         if (diaChoiceLocal == "Water")
@@ -215,8 +256,67 @@ void askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerS
                 diaObj.writeDialouge("Invalid - No items removed.", false, true);
             }
         }
+        else if (diaChoiceLocal == "View Ticket")
+        {
+            printOrder(diaObj, currentOrder);
+        }
     } while (diaChoiceLocal != "Submit Order");
     
+    //Player submitted Order
+    //Calculate rating out of 100 and return 
+    int matchCount = 0;
+    double totalItemScore = 0;
+
+    //check customer order 
+    for (int i = 0; i < currentOrder.size(); i++) {
+        string keyName = currentOrder[i]->getName();
+        double keyVal = currentOrder[i]->getItemScore();
+
+        int index = findIndex(prepOrder, keyName);
+
+        if (index != -1) {
+            matchCount++;
+
+            double subVal = prepOrder[index]->getItemScore();
+
+            double itemScore = scoreItem(keyVal, subVal);
+            totalItemScore += itemScore;
+        }
+    }
+
+    int totalKeyItems = currentOrder.size();
+
+    if (totalKeyItems == 0) return 0;
+
+    //M = match ratio
+    double M =  (double)matchCount / (currentOrder.size() + prepOrder.size() - matchCount);
+
+    //A = average score
+    double A = (matchCount > 0) ? totalItemScore / matchCount : 0; //Left true, right false
+
+    //Final score
+    double finalScore = M * A;
+
+    return finalScore;
+
+}
+
+void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats)
+{
+    //Shows a shop and current money, and exp then purcahse stuff...
+    diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
+    //Make an inventory object to manage all stuffs FIX ME!!!
+    diaObj.writeDialouge("Current Earnings: " + to_string(gameStats->getEarnings()), false, false);
+    
+    diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
+    diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
+    diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
+    diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
+    diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
+    diaObj.writeDialouge("/////////////////////////////////////////////", false, false);
+
+    string diaLocalChoice;
+
 }
 
 int main()
@@ -295,8 +395,8 @@ int main()
     //Gameplay loop starts!
     diaObj.writeDialouge("You finish final preparations, all you need to do now is flip the open sign...", true, true);
     diaObj.writeDialouge("Let's do this!", false, true);
-    printStatus(diaObj, gameStats, playerStats, timeClass);
 
+    //Start main game time in a different thread
     thread t1(&TimeClass::startTime, &timeClass);
     
 
@@ -308,12 +408,12 @@ int main()
         while (timeClass.reachedEnd == false)
         {
            
-            //FIXME: add random customer picker later 
+            printStatus(diaObj, gameStats, playerStats, timeClass);
             Customer* currCustomer = nullptr;
             
             selectRandomCustomer(currCustomer, playerStats->getRep());
              
-            diaObj.writeDialouge("The Tavern door swings open...", false, true);
+            diaObj.writeDialouge("The Tavern door swings open...", true, true);
 
             diaObj.writeDialouge("CUSTOMER: " + currCustomer->getName(), false, true);
             diaObj.writeDialouge(currCustomer->getDEnter(), false, true);
@@ -326,42 +426,126 @@ int main()
                     diaObj.askUserChoice(diaChoiceMain);
                     if (diaChoiceMain == "No")
                     {
+                        //Declined message
                         diaObj.writeDialouge(currCustomer->getDdeclined(), false, true);
+                        //Lower players reputation
+                        diaObj.writeDialouge("You lost reputation: -1", true, false);
+                        playerStats->setRep(playerStats->getRep() - 1);
                         break;
                     }
                 } while (diaChoiceMain != "Yes");
             }
             else
             {
+                //Rep too low dialogue
                 diaObj.writeDialouge(currCustomer->getDrepTooLow(), false, true);
-                diaObj.writeDialouge("Reputation is too low to serve this customer!", false, true);
+                diaObj.writeDialouge("Reputation is too low to serve this customer!", true, true);
                 continue;
             }
+            //Check for decline to move to next customer
             if (diaChoiceMain == "No") { continue; }
+
+            //Order was taken start a customer time in a different thread
+            CustomerTimer localCustTimer;
+            thread t2(&CustomerTimer::startTime, &localCustTimer);
+
            
+            //Creates a order
             createOrder(currCustomer, playerStats->getExp(), currentOrder);
-            //Ordering sequence!!
+            //Print time
             diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
+
+            //Customer starts order text
             diaObj.writeDialouge(currCustomer->getDstartOrder(), false, true);
-            diaObj.writeDialouge("///////////ORDER///////////", false, false);
-            for (int i = 0; i < currentOrder.size(); i++)
-            {
-                
-                diaObj.writeDialouge(currentOrder[i]->getName(), false, true);
-            }
-            diaObj.writeDialouge("///////////ORDER///////////", false, false);
 
-            askSelectOrder(diaObj, gameStats, playerStats, currentPrep, timeClass);
+            //Print out order to player
+            printOrder(diaObj,currentOrder);
 
-            diaObj.writeDialouge(currCustomer->getDsubmitOrder(), false, false);
+            //start loop preparing order items, end with grading
+            int orderGrade;
+            orderGrade = askSelectOrder(diaObj, gameStats, playerStats, currentPrep, timeClass, currentOrder);
 
-            //Grade order 
+            //Order submitted
+            //Tips
+            int tips = 0;
+            //End timer
+            localCustTimer.timeActive = false;
+            int waitTime = localCustTimer.elapsed;
+            t2.detach();
 
-            int custGrade = 0;
-
-            //FIXME TOMORROW, add rating system check calandar for next
+            //Submit Dialouge
+            diaObj.writeDialouge(currCustomer->getDsubmitOrder(), true, false);
 
             
+            //Check wait time 
+            if (waitTime <= currCustomer->getPatience())
+            {
+                //Order submited in time
+                tips += 5;
+            }
+            else
+            {
+                //Order submited took too long
+                tips -= 5;
+                diaObj.writeDialouge(currCustomer->getDWaitToLong(), true, false);
+            }
+
+            //If statements above are for special cases of customers, else is normal customers
+            // FIXME: Add statement above
+            //Grade order 
+            //Score above 70 is passing 
+            int localEarnings = 0;
+
+            if (orderGrade >= 70)
+            {
+                //Passed!!!
+                diaObj.writeDialouge(currCustomer->getDOrderGood(), false, false);
+
+                //tips
+                tips += orderGrade * 0.05;
+                diaObj.writeDialouge("You've been tipped: " + to_string(tips), false, false);
+                //Add local earnings to tips, can only earn tips if sent out with a good grade
+                localEarnings += tips;
+
+                //Rep
+                diaObj.writeDialouge("You gained Reputation: 2", false, false);
+                playerStats->setRep(playerStats->getRep() + 2);
+
+                //Exp
+                diaObj.writeDialouge("You gained Exp: 5", false, false);
+                playerStats->setExp(playerStats->getExp() + 5);
+
+                //Prof
+                diaObj.writeDialouge("You gained Proficency: 1", true, false);
+                playerStats->setProf(playerStats->getProf() + 1);
+            }
+            else
+            {
+                //Failed...
+                diaObj.writeDialouge(currCustomer->getDOrderBad(), false, false);
+
+                //Rep
+                diaObj.writeDialouge("You lost Reputation: -1", false, false);
+                playerStats->setRep(playerStats->getRep() - 1);
+
+                //Exp
+                diaObj.writeDialouge("You gained Exp: 2", true, false);
+                playerStats->setExp(playerStats->getExp() + 2);
+            }
+
+            //Give player the earnings
+            for (int i = 0; i < currentOrder.size(); i++)
+            {
+                localEarnings += currentOrder[i]->getCost();
+            }
+
+            //Gold Earnings
+            diaObj.writeDialouge("You earned Gold: " + to_string(localEarnings) + " | Tips: " + to_string(tips), true, false);
+            gameStats->addEarnings(localEarnings);
+            playerStats->setGold(playerStats->getGold() + localEarnings);
+
+            //Reset order to allow next customer!
+            currentOrder.clear();
         }
 
 
@@ -375,13 +559,6 @@ int main()
             //failed
         }
     }
-    
-
-
-    //cout << gameStats.getDay();
-    //lets assume we're making a drink
-    // Water newDrink;
-    // cout << newDrink.prepareItem() << endl;
 
     delete playerStats;
     delete gameStats;

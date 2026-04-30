@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="Bread.h" />
     <ClInclude Include="Customer.h" />
+    <ClInclude Include="CustomerTimer.h" />
     <ClInclude Include="DialougeClass.h" />
     <ClInclude Include="ElapsedTime.h" />
     <ClInclude Include="Fish.h" />

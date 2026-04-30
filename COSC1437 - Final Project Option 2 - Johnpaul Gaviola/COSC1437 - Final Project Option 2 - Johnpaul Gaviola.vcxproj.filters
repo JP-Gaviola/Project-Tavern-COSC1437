@@ -92,5 +92,8 @@
     <ClInclude Include="Fish.h">
       <Filter>OrderItems\Food</Filter>
     </ClInclude>
+    <ClInclude Include="CustomerTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,14 +7,15 @@ class OrderItem {
 
 protected:
 	string itemName; //Name of item used to check if it was in the order
-	int itemScore;
+	int itemScore = 100; //Set to 100 by default for grading
 	int stock;
 	int ExpNeeded;
 	int cost;
 
 public:
+	//Code the custom minigame here
 	virtual void prepareItem() = 0; //override this 
-
+	
 	int getItemScore();
 	int getStock();
 	string getName();
@@ -24,5 +25,5 @@ public:
 
 	void setItemScore(int);
 	void setStock(int);
-	//Code the custom minigame here and return a score to be graded 
+
 };
