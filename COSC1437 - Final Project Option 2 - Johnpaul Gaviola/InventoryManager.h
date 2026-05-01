@@ -3,6 +3,10 @@
 
 //All order items
 
+#include "Water.h"
+#include "Bread.h"
+#include "Fish.h"
+
 class InventoryManager {
 
 public:
@@ -18,7 +22,17 @@ public:
 	int getWaterStock() { return water; }
 	int getBreadStock() { return bread; }
 	int getFishStock() { return fish; }
-	
+
+	void addWaterStock(int temp) { water += temp; }
+	void addBreadStock(int temp) { bread += temp; }
+	void addFishStock(int temp) { fish += temp; }
+
+	int getWaterPrice() { Water temp; return temp.getCost(); }
+	int getBreadPrice() { Bread temp; return temp.getCost(); }
+	int getFishPrice() { Fish temp; return temp.getCost(); }
+
+	int getFishExp() { Fish temp; return temp.getExpNeeded(); }
+
 private:
 	int water;
 	int bread;

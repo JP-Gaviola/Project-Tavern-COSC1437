@@ -191,6 +191,12 @@ int findIndex(const vector<OrderItem*>& table, string name) {
     return -1; // not found
 }
 
+bool is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
 
 
 int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass, vector<OrderItem*> currentOrder, InventoryManager& inventoryManager)
@@ -211,42 +217,53 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
         diaObj.writeDialouge("//////////////PREP///////////////", false, false);
         diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
         diaObj.writeDialouge("Currently Prepped: " + prepped, false, true);
+
         diaObj.writeDialouge("What item would you like to prepare/do?", false, true);
-        diaObj.writeDialouge("Water - Bread - Fish(E:10) - Cake - Meat - Submit Order - Remove Item - View Ticket", false, false);
+        string optionList = "Water(S:" + to_string(inventoryManager.getWaterStock());
+        optionList += ") - Bread(S:" + to_string(inventoryManager.getBreadStock());
+        optionList += ") - Fish(S:" + to_string(inventoryManager.getFishStock());
+        optionList += ") -  Submit Order - Remove Item - View Order";
+
+        diaObj.writeDialouge(optionList, false, false);
 
         diaObj.askUserChoice(diaChoiceLocal);
         if (diaChoiceLocal == "Water")
         {
-            //check stock later move it to player stats
-            //Stock check passed
+            //Stock check 
+            if (inventoryManager.getWaterStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Water* tempWater = new Water;
             tempWater->prepareItem();
             prepOrder.push_back(tempWater);
+            inventoryManager.addWaterStock(-1);
         }
         else if (diaChoiceLocal == "Bread")
         {
+            if (inventoryManager.getBreadStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Bread* tempBread = new Bread;
             tempBread->prepareItem();
             prepOrder.push_back(tempBread);
+            inventoryManager.addBreadStock(-1);
         }
         else if (diaChoiceLocal == "Fish")
         {
-            Fish tempFish;
-            if (playerStats->getExp() > tempFish.getExpNeeded())
-            {
-
-            }
-            else
-            {
-                diaObj.writeDialouge("Not Enough Experience!", false, true);
-            }
+            if (inventoryManager.getFishStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
+            Fish* tempFish = new Fish;
+            
+            tempFish->prepareItem();
+            prepOrder.push_back(tempFish);
+            inventoryManager.addFishStock(-1);
         }
+
+
         else if (diaChoiceLocal == "Remove Item")
         {
             diaObj.writeDialouge("What number item would you like to remove? (0,1,2,3...)", false, true);
             diaObj.writeDialouge("Currently Prepped: " + prepped, false, true);
             diaObj.askUserChoice(diaChoiceLocal);
-            int converted = stoi(diaChoiceLocal);
+            int converted;
+                if (is_number(diaChoiceLocal)) { converted = stoi(diaChoiceLocal); }
+                else { converted = 99999; } //it is physically impossible to reach 99999 itenms in an order fight me
+             
             if (converted >= 0 && converted < prepOrder.size())
             {
                 swap(prepOrder[converted], prepOrder.back());
@@ -257,7 +274,7 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
                 diaObj.writeDialouge("Invalid - No items removed.", false, true);
             }
         }
-        else if (diaChoiceLocal == "View Ticket")
+        else if (diaChoiceLocal == "View Order")
         {
             printOrder(diaObj, currentOrder);
         }
@@ -302,41 +319,118 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
 
 }
 
+
+
+int askBuy(Dialouge& diaObj)
+{
+    diaObj.writeDialouge("How much would you like to purchase?", false, false);
+    string localDiaChoice;
+    diaObj.askUserChoice(localDiaChoice);
+    if (is_number(localDiaChoice))
+    {
+        return stoi(localDiaChoice);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+
 void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
 {
     //Shows a shop and current money, and exp then purcahse stuff..
-
-    diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
-    diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
-    diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
-    diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
-    diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
-    diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
-    diaObj.writeDialouge("Water : Price 2 ", false, false);
-    diaObj.writeDialouge("Bread : Price 5 ", false, false);
-    diaObj.writeDialouge("Fish : Price 10 : Exp 20 ", false, false);
-    diaObj.writeDialouge("//////////////Store Inventory/////////////////", false, false);
-    diaObj.writeDialouge("Water : " + to_string(inventoryManager.getWaterStock()), false, false);
-    diaObj.writeDialouge("Bread : " + to_string(inventoryManager.getBreadStock()), false, false);
-    diaObj.writeDialouge("Fish : " + to_string(inventoryManager.getFishStock()), false, false);
-    diaObj.writeDialouge("//////////////////////////////////////////////", false, false);
-    diaObj.writeDialouge("Type the item you would like to stock up on. Type 'Finish' when ready to move on!", false, true);
     string localDiaChoice;
     do
     {
+       diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
+       diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
+       diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
+       diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
+       diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
+       diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
+       diaObj.writeDialouge("Water : Price 2 ", false, false);
+       diaObj.writeDialouge("Bread : Price 5 ", false, false);
+       diaObj.writeDialouge("Fish : Price 10 : Exp 20 ", false, false);
+       diaObj.writeDialouge("//////////////Store Inventory/////////////////", false, false);
+       diaObj.writeDialouge("Water : " + to_string(inventoryManager.getWaterStock()), false, false);
+       diaObj.writeDialouge("Bread : " + to_string(inventoryManager.getBreadStock()), false, false);
+       diaObj.writeDialouge("Fish : " + to_string(inventoryManager.getFishStock()), false, false);
+       diaObj.writeDialouge("//////////////////////////////////////////////", false, false);
+       diaObj.writeDialouge("Type the item you would like to stock up on. Type 'Finish' when ready to move on!", false, true);
+       //For Cant afford noti
+       bool inBuy = false;
+       bool couldntAfford = false;
+       //Cost
+       int cost = 0;
+       //Ask user what they want to stock
        diaObj.askUserChoice(localDiaChoice);
+       if (localDiaChoice == "Finish") { break; }
+       //Ask user how much they want to stock
+       int localStockChoice = askBuy(diaObj);
        if (localDiaChoice == "Water")
        {
-
+           inBuy = true;
+           //Can afford?
+           cost = (inventoryManager.getWaterPrice() * localStockChoice);
+           if (playerStats->getGold() >= cost)
+           {
+               inventoryManager.addWaterStock(localStockChoice);
+           }
+           else
+           {
+               couldntAfford = true;
+           }
        }
        else if (localDiaChoice == "Bread")
        {
-
+           inBuy = true;
+           cost = (inventoryManager.getBreadPrice() * localStockChoice);
+           if (playerStats->getGold() >= cost)
+           {
+               inventoryManager.addBreadStock(localStockChoice);
+           }
+           else
+           {
+               couldntAfford = true;
+           }
        }
        else if (localDiaChoice == "Fish")
        {
-
+           inBuy = true;
+           if (playerStats->getExp() >= inventoryManager.getFishExp())
+           {
+               cost = (inventoryManager.getFishPrice() * localStockChoice);
+               if (playerStats->getGold() >= cost)
+               {
+                   inventoryManager.addFishStock(localStockChoice);
+               }
+               else
+               {
+                   couldntAfford = true;
+               }
+           }
+           else
+           {
+               diaObj.writeDialouge("Not enough Experience!", true, true);
+           }
+          
        }
+       if (inBuy)
+       {
+           if (couldntAfford)
+           {
+               diaObj.writeDialouge("Can't afford / invalid input!", true, true);
+           }
+           else
+           {
+               playerStats->setGold(playerStats->getGold() - cost);
+               diaObj.writeDialouge("Purchase Success!", true, true);
+           }
+       }
+
+
     } while (localDiaChoice != "Finish");
     diaObj.writeDialouge("You walk out of the supply store and begin stocking your tavern...", true, true);
 
@@ -415,6 +509,8 @@ int main()
     vector<OrderItem*> currentOrder;
     vector<OrderItem*> currentPrep;
     
+    //Stocking phase
+    enterStockingPhase(diaObj, gameStats, playerStats, inventoryManager);
     
     //Gameplay loop starts!
     diaObj.writeDialouge("You finish final preparations, all you need to do now is flip the open sign...", true, true);
@@ -480,7 +576,7 @@ int main()
             diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
 
             //Customer starts order text
-            diaObj.writeDialouge(currCustomer->getDstartOrder(), false, true);
+            diaObj.writeDialouge(currCustomer->getDstartOrder(), true, true);
 
             //Print out order to player
             printOrder(diaObj,currentOrder);
@@ -498,24 +594,12 @@ int main()
             t2.detach();
 
             //Submit Dialouge
-            diaObj.writeDialouge(currCustomer->getDsubmitOrder(), true, false);
+            diaObj.writeDialouge(currCustomer->getDsubmitOrder(), true, true);
 
             
-            //Check wait time 
-            if (waitTime <= currCustomer->getPatience())
-            {
-                //Order submited in time
-                tips += 5;
-            }
-            else
-            {
-                //Order submited took too long
-                tips -= 5;
-                diaObj.writeDialouge(currCustomer->getDWaitToLong(), true, false);
-            }
+         
 
-            //If statements above are for special cases of customers, else is normal customers
-            // FIXME: Add statement above
+            
             //Grade order 
             //Score above 70 is passing 
             int localEarnings = 0;
@@ -523,7 +607,21 @@ int main()
             if (orderGrade >= 70)
             {
                 //Passed!!!
-                diaObj.writeDialouge(currCustomer->getDOrderGood(), false, false);
+                //Check wait time 
+                //Only allow tips when high grade
+                if (waitTime <= currCustomer->getPatience())
+                {
+                    //Order submited in time
+                    tips += 5;
+                }
+                else
+                {
+                    //Order submited took too long
+                    diaObj.writeDialouge(currCustomer->getDWaitToLong(), true, true);
+                }
+
+                
+                diaObj.writeDialouge(currCustomer->getDOrderGood(), true, true);
 
                 //tips
                 tips += orderGrade * 0.05;
@@ -546,7 +644,7 @@ int main()
             else
             {
                 //Failed...
-                diaObj.writeDialouge(currCustomer->getDOrderBad(), false, false);
+                diaObj.writeDialouge(currCustomer->getDOrderBad(), true, true);
 
                 //Rep
                 diaObj.writeDialouge("You lost Reputation: -1", false, false);
@@ -563,13 +661,25 @@ int main()
                 localEarnings += currentOrder[i]->getCost();
             }
 
+            if (orderGrade <= 0) { localEarnings = 0; }
+
             //Gold Earnings
-            diaObj.writeDialouge("You earned Gold: " + to_string(localEarnings) + " | Tips: " + to_string(tips), true, false);
+            diaObj.writeDialouge("You earned Gold: " + to_string(localEarnings) + " | Tips: " + to_string(tips), true, true);
             gameStats->addEarnings(localEarnings);
             playerStats->setGold(playerStats->getGold() + localEarnings);
 
             //Reset order to allow next customer!
             currentOrder.clear();
+
+            //Quota check
+            if (gameStats->getEarnings() >= gameStats->getQuota())
+            {
+                gameResult = 1;
+            }
+            else
+            {
+                gameResult = 2;
+            }
         }
 
 
