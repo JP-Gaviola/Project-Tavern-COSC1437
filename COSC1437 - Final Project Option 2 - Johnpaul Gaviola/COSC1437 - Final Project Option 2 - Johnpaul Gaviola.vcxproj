@@ -146,6 +146,7 @@
     <ClInclude Include="ElapsedTime.h" />
     <ClInclude Include="Fish.h" />
     <ClInclude Include="Ingis.h" />
+    <ClInclude Include="InventoryManager.h" />
     <ClInclude Include="OrderItem.h" />
     <ClInclude Include="PlayerStats.h" />
     <ClInclude Include="TavernMain.h" />

@@ -18,6 +18,7 @@
 #include "TimeClass.h"
 #include "ElapsedTime.h"
 #include "CustomerTimer.h"
+#include "InventoryManager.h"
 
 
 ///Order Items
@@ -192,7 +193,7 @@ int findIndex(const vector<OrderItem*>& table, string name) {
 
 
 
-int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass, vector<OrderItem*> currentOrder)
+int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, vector<OrderItem*> prepOrder, TimeClass& timeClass, vector<OrderItem*> currentOrder, InventoryManager& inventoryManager)
 {
     int i;
     string prepped = "";
@@ -301,21 +302,43 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
 
 }
 
-void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats)
+void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
 {
-    //Shows a shop and current money, and exp then purcahse stuff...
-    diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
-    //Make an inventory object to manage all stuffs FIX ME!!!
-    diaObj.writeDialouge("Current Earnings: " + to_string(gameStats->getEarnings()), false, false);
-    
+    //Shows a shop and current money, and exp then purcahse stuff..
+
     diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
     diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
     diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
     diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
     diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
-    diaObj.writeDialouge("/////////////////////////////////////////////", false, false);
+    diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
+    diaObj.writeDialouge("Water : Price 2 ", false, false);
+    diaObj.writeDialouge("Bread : Price 5 ", false, false);
+    diaObj.writeDialouge("Fish : Price 10 : Exp 20 ", false, false);
+    diaObj.writeDialouge("//////////////Store Inventory/////////////////", false, false);
+    diaObj.writeDialouge("Water : " + to_string(inventoryManager.getWaterStock()), false, false);
+    diaObj.writeDialouge("Bread : " + to_string(inventoryManager.getBreadStock()), false, false);
+    diaObj.writeDialouge("Fish : " + to_string(inventoryManager.getFishStock()), false, false);
+    diaObj.writeDialouge("//////////////////////////////////////////////", false, false);
+    diaObj.writeDialouge("Type the item you would like to stock up on. Type 'Finish' when ready to move on!", false, true);
+    string localDiaChoice;
+    do
+    {
+       diaObj.askUserChoice(localDiaChoice);
+       if (localDiaChoice == "Water")
+       {
 
-    string diaLocalChoice;
+       }
+       else if (localDiaChoice == "Bread")
+       {
+
+       }
+       else if (localDiaChoice == "Fish")
+       {
+
+       }
+    } while (localDiaChoice != "Finish");
+    diaObj.writeDialouge("You walk out of the supply store and begin stocking your tavern...", true, true);
 
 }
 
@@ -354,6 +377,7 @@ int main()
     //Creating game elements
     //Can add loading text later
     //Objects
+    InventoryManager inventoryManager;
     GameStats* gameStats = nullptr;
     PlayerStats* playerStats = nullptr;
     TimeClass timeClass;
@@ -463,7 +487,7 @@ int main()
 
             //start loop preparing order items, end with grading
             int orderGrade;
-            orderGrade = askSelectOrder(diaObj, gameStats, playerStats, currentPrep, timeClass, currentOrder);
+            orderGrade = askSelectOrder(diaObj, gameStats, playerStats, currentPrep, timeClass, currentOrder, inventoryManager);
 
             //Order submitted
             //Tips
