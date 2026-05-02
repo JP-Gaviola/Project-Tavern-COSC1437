@@ -37,7 +37,7 @@ using namespace std;
 
 int generateQuota(int day)
 {
-    int baseQuota = (day * 10) + 50;
+    int baseQuota = (day * 10) + 20;
     return (baseQuota) + (baseQuota * 0.5);
 }
 

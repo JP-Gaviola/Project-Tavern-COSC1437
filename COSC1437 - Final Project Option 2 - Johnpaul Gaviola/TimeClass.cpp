@@ -36,7 +36,7 @@ void TimeClass::startTime()
 		{
 			Min += 1;
 		}
-		this_thread::sleep_for(chrono::milliseconds(50)); //250 mili = 3 minutes per day 
+		this_thread::sleep_for(chrono::milliseconds(500)); //500 mili = 6 minutes per day 
 
 		if (restartTime)
 		{
