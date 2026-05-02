@@ -2,6 +2,8 @@
 #include <string>
 using namespace std;
 
+//Maybe day requirement for some custoemrs
+
 //getter
 string Customer::getName() { return customerName; }
 int Customer::getPatience() { return patienceLevel; }

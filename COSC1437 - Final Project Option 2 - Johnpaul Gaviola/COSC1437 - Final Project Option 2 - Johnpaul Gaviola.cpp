@@ -72,7 +72,6 @@ void endTime(TimeClass& timeClass, thread& t1)
 void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, TimeClass& timeClass)
 {
     diaObj.writeDialouge("////////////////Game Stats///////////////////", false, false);
-    diaObj.writeDialouge("Current Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Quota: " + to_string(gameStats->getQuota()), false, false);
     diaObj.writeDialouge("Today's Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
@@ -504,6 +503,22 @@ int main()
     {
         //loaded game
     }
+
+    //Store base stats here to be used when retrying
+    int baseDay = gameStats->getDay();
+    int baseEarnings = gameStats->getEarnings();
+    //
+    int baseExp = playerStats->getExp();
+    int baseGold = playerStats->getGold();
+    int baseRep = playerStats->getRep();
+    int baseProf = playerStats->getProf();
+    //Stock
+    int baseWater = inventoryManager.getWaterStock();
+    int baseBread = inventoryManager.getBreadStock();
+    int baseFish = inventoryManager.getFishStock();
+
+    bool loopLocker = true;
+
     gameStats->setQuota(generateQuota(gameStats->getDay()));
     //Gameplay Elements
     vector<OrderItem*> currentOrder;
@@ -521,11 +536,11 @@ int main()
     
 
     //Gameplay loop 
-    while (gameResult == -1) //Only continue if time isnt 21
+    while (loopLocker) //Only continue if time isnt 21
     {
         
         //Main game! 
-        while (timeClass.reachedEnd == false)
+        while (loopLocker)
         {
            
             printStatus(diaObj, gameStats, playerStats, timeClass);
@@ -596,10 +611,7 @@ int main()
             //Submit Dialouge
             diaObj.writeDialouge(currCustomer->getDsubmitOrder(), true, true);
 
-            
-         
 
-            
             //Grade order 
             //Score above 70 is passing 
             int localEarnings = 0;
@@ -680,18 +692,68 @@ int main()
             {
                 gameResult = 2;
             }
-        }
 
+            if (timeClass.reachedEnd == true)
+            {
 
-        //Day ended!!
-        if (gameResult == 1)
-        {
-            //Passed quota
+                //Day ended!!
+                diaObj.writeDialouge("The day has come to an end!", true, true);
+                diaObj.writeDialouge("You close up shop and count your earnings, glancing at the quota requirement...", true, true);
+                endTime(timeClass, t1);
+                if (gameResult == 1)
+                {
+                    //Passed quota
+                    diaObj.writeDialouge("The quota has been reached!", true, true);
+                }
+                else if (gameResult == 2)
+                {
+                    //failed
+                    diaObj.writeDialouge("The Qutoa has not been reached... You take your losses and begin to packup...", true, true);
+                    diaObj.writeDialouge("Or is this really the end?", true, true);
+                    diaObj.writeDialouge("What will it be? : Retry - Exit", true, true);
+                    do
+                    {
+                        diaObj.askUserChoice(diaChoiceMain);
+                        if (diaChoiceMain == "Retry" || diaChoiceMain == "Exit")
+                        {
+                            break;
+                        }
+                    } while (diaChoiceMain != "Exit" || diaChoiceMain != "Retry");
+
+                    if (diaChoiceMain == "Exit")
+                    {
+                        //MainMenu
+                        diaObj.writeDialouge("See you next time!", true, true);
+                        return 1;
+                    }
+                    else
+                    {
+                        //Retry
+                        //Assign base stats and restart timer, set gameresult to -1, continue
+
+                        gameStats->setDay(baseDay);
+                        gameStats->setEarnings(baseEarnings);
+                        playerStats->setExp(baseExp);
+                        playerStats->setGold(baseGold);
+                        playerStats->setProf(baseProf);
+                        playerStats->setRep(baseRep);
+                        inventoryManager.setWaterStock(baseWater);
+                        inventoryManager.setBreadStock(baseBread);
+                        inventoryManager.setFishStock(baseFish);
+
+                        //Stocking phase
+                        enterStockingPhase(diaObj, gameStats, playerStats, inventoryManager);
+                        
+                        gameResult = -1;
+
+                        timeClass.restartTime = true;
+                        continue;
+                    }
+                }
+            }
+
         }
-        else if (gameResult == 2)
-        {
-            //failed
-        }
+        
     }
 
     delete playerStats;

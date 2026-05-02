@@ -27,6 +27,10 @@ public:
 	void addBreadStock(int temp) { bread += temp; }
 	void addFishStock(int temp) { fish += temp; }
 
+	void setWaterStock(int temp) { water = temp; }
+	void setBreadStock(int temp) { bread = temp; }
+	void setFishStock(int temp) { fish = temp; }
+
 	int getWaterPrice() { Water temp; return temp.getCost(); }
 	int getBreadPrice() { Bread temp; return temp.getCost(); }
 	int getFishPrice() { Fish temp; return temp.getCost(); }

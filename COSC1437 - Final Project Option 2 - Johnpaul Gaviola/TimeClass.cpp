@@ -11,11 +11,13 @@ TimeClass::TimeClass()
 	Min = 0;
 	timeActive = false;
 	reachedEnd = false;
+	restartTime = false;
 }
 
 void TimeClass::startTime()
 {
 	//Run in a seperate thread
+	//Reset
 	timeActive = true;
 	while (timeActive)
 	{
@@ -34,6 +36,15 @@ void TimeClass::startTime()
 		{
 			Min += 1;
 		}
-		this_thread::sleep_for(chrono::seconds(1));
+		this_thread::sleep_for(chrono::milliseconds(50)); //250 mili = 3 minutes per day 
+
+		if (restartTime)
+		{
+			Hour = 9;
+			Min = 0;
+			timeActive = true;
+			reachedEnd = false;
+			restartTime = false;
+		}
 	}
 }

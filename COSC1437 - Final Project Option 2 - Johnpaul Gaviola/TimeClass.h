@@ -15,4 +15,5 @@ public:
 	int Min;
 	bool timeActive;
 	bool reachedEnd;
+	bool restartTime;
 };
