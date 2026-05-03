@@ -87,6 +87,7 @@ void endTime(TimeClass& timeClass, thread& t1)
 void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, TimeClass& timeClass)
 {
     diaObj.writeDialouge("////////////////Game Stats///////////////////", false, false);
+    diaObj.writeDialouge("Day: " + to_string(gameStats->getDay()), false, false);
     diaObj.writeDialouge("Quota: " + to_string(gameStats->getQuota()), false, false);
     diaObj.writeDialouge("Today's Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
