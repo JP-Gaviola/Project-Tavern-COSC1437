@@ -4,7 +4,7 @@ using namespace std;
 GameStats::GameStats()
 {
 	Day = 0;
-	Quota = 100;
+	Quota = 0;
 	Earnings = 0;
 	//Time is managed in another class
 	HappyHour = false;

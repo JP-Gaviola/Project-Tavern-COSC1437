@@ -32,13 +32,28 @@
 #include "TownResident.h"
 #include "Ingis.h"
 
-
 using namespace std;
+
+struct {
+    //GameStats
+    int baseDay;
+    int baseEarnings;
+    //Player
+    int baseExp;
+    int baseGold;
+    int baseRep;
+    int baseProf;
+    //Stock
+    int baseWater;
+    int baseBread;
+    int baseFish;
+} baseStats;
 
 int generateQuota(int day)
 {
     int baseQuota = (day * 10) + 20;
     return (baseQuota) + (baseQuota * 0.5);
+    //return 5 + day; // for debug
 }
 
 string getTime(TimeClass& timeClass)
@@ -349,9 +364,9 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
        diaObj.writeDialouge("Reputation: " + to_string(playerStats->getRep()), false, false);
        diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
        diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
-       diaObj.writeDialouge("Water : Price 2 ", false, false);
-       diaObj.writeDialouge("Bread : Price 5 ", false, false);
-       diaObj.writeDialouge("Fish : Price 10 : Exp 20 ", false, false);
+       diaObj.writeDialouge("Water : Price: " + to_string(inventoryManager.getWaterPrice()), false, false);
+       diaObj.writeDialouge("Bread : Price: " + to_string(inventoryManager.getBreadPrice()), false, false);
+       diaObj.writeDialouge("Fish : Price: " + to_string(inventoryManager.getFishPrice()) + " : Exp: " + to_string(inventoryManager.getFishExp()), false, false);
        diaObj.writeDialouge("//////////////Store Inventory/////////////////", false, false);
        diaObj.writeDialouge("Water : " + to_string(inventoryManager.getWaterStock()), false, false);
        diaObj.writeDialouge("Bread : " + to_string(inventoryManager.getBreadStock()), false, false);
@@ -435,6 +450,110 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
 
 }
 
+bool saveGame(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
+{
+    diaObj.writeDialouge("Enter save file name:", false, true);
+    string fileName;
+    diaObj.askUserChoice(fileName);
+
+    ofstream saveFile;
+    saveFile.open(fileName + ".txt");
+    if (saveFile.is_open())
+    {
+        //Game Stats
+        saveFile << gameStats->getDay() << endl;
+        //Player stats
+        saveFile << playerStats->getExp() << endl;
+        saveFile << playerStats->getGold() << endl;
+        saveFile << playerStats->getRep() << endl;
+        saveFile << playerStats->getProf() << endl;
+        //Stock
+        saveFile << inventoryManager.getWaterStock() << endl;
+        saveFile << inventoryManager.getBreadStock() << endl;
+        saveFile << inventoryManager.getFishStock() << endl;
+
+        saveFile.close();
+
+        diaObj.writeDialouge("Data Saved! REMEMBER THE NAME: " + fileName, true, true);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int convertStringtoInt(string toConvert)
+{
+    //Assume valid
+    return stoi(toConvert);
+}
+
+bool loadGame(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
+{
+    diaObj.writeDialouge("Enter save file name:", false, true);
+    string fileName;
+    diaObj.askUserChoice(fileName);
+
+    ifstream dataFile;
+    dataFile.open(fileName + ".txt");
+    if (dataFile.is_open() && dataFile.good())
+    {
+        //Start reading
+        string tempstr;
+
+        //Gamestats
+        getline(dataFile, tempstr);
+        gameStats->setDay(convertStringtoInt(tempstr)); //Day
+        //Player Stats
+        getline(dataFile, tempstr);
+        playerStats->setExp(convertStringtoInt(tempstr)); //Exp
+        getline(dataFile, tempstr);
+        playerStats->setGold(convertStringtoInt(tempstr)); //Gold
+        getline(dataFile, tempstr);
+        playerStats->setRep(convertStringtoInt(tempstr)); //Rep
+        getline(dataFile, tempstr);
+        playerStats->setProf(convertStringtoInt(tempstr)); //Prof
+        //Stock
+        getline(dataFile, tempstr);
+        inventoryManager.setWaterStock(convertStringtoInt(tempstr)); //Water
+        getline(dataFile, tempstr);
+        inventoryManager.setBreadStock(convertStringtoInt(tempstr)); //Bread
+        getline(dataFile, tempstr);
+        inventoryManager.setFishStock(convertStringtoInt(tempstr)); //Fish
+
+        dataFile.close();
+
+        diaObj.writeDialouge("Data Loaded!", true, true);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+
+}
+
+void setBaseStats(GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
+{
+    //Sets the current stats to base
+    //Game
+    baseStats.baseDay = gameStats->getDay();
+    baseStats.baseEarnings = gameStats->getEarnings();
+    //Player
+    baseStats.baseExp = playerStats->getExp();
+    baseStats.baseGold = playerStats->getGold();
+    baseStats.baseRep = playerStats->getRep();
+    baseStats.baseProf = playerStats->getProf();
+    //Stock
+    baseStats.baseWater = inventoryManager.getWaterStock();
+    baseStats.baseBread = inventoryManager.getBreadStock();
+    baseStats.baseFish = inventoryManager.getFishStock();
+}
+
 int main()
 {
     //Menu sequence////////////////////////////////////////////////////////////////////
@@ -471,51 +590,40 @@ int main()
     //Can add loading text later
     //Objects
     InventoryManager inventoryManager;
-    GameStats* gameStats = nullptr;
-    PlayerStats* playerStats = nullptr;
+    GameStats* gameStats = new GameStats;
+    PlayerStats* playerStats = new PlayerStats;
     TimeClass timeClass;
     string diaChoiceMain;
 
     if (loadgame)
     {
         //Load objects respectively
-
-    }
-    else
-    {
-        //New game
-        gameStats = new GameStats;
-        playerStats = new PlayerStats;
+        if (!loadGame(diaObj, gameStats, playerStats, inventoryManager))
+        {
+            diaObj.writeDialouge("File operation failed!", true, true);
+            return 1;
+        }
     }
     //Load game objects
     int gameResult = -1;
 
     //Start the game!
-
+    //Intro sequence
     if (gameStats->getDay() == 0)
     {
-        //Intro sequence
+        
         //New game
         
         diaObj.writeDialouge("Blahblah intro sequence", false, true);
     }
     else
     {
-        //loaded game
+        //loaded game intro sequence
+        diaObj.writeDialouge("Blahblah loaded intro sequence", false, true);
     }
 
     //Store base stats here to be used when retrying
-    int baseDay = gameStats->getDay();
-    int baseEarnings = gameStats->getEarnings();
-    //
-    int baseExp = playerStats->getExp();
-    int baseGold = playerStats->getGold();
-    int baseRep = playerStats->getRep();
-    int baseProf = playerStats->getProf();
-    //Stock
-    int baseWater = inventoryManager.getWaterStock();
-    int baseBread = inventoryManager.getBreadStock();
-    int baseFish = inventoryManager.getFishStock();
+    setBaseStats(gameStats, playerStats, inventoryManager);
 
     bool loopLocker = true;
 
@@ -559,16 +667,11 @@ int main()
                 do
                 {
                     diaObj.askUserChoice(diaChoiceMain);
-                    if (diaChoiceMain == "No")
+                    if (diaChoiceMain == "No" || diaChoiceMain == "Yes")
                     {
-                        //Declined message
-                        diaObj.writeDialouge(currCustomer->getDdeclined(), false, true);
-                        //Lower players reputation
-                        diaObj.writeDialouge("You lost reputation: -1", true, false);
-                        playerStats->setRep(playerStats->getRep() - 1);
                         break;
                     }
-                } while (diaChoiceMain != "Yes");
+                } while (true);
             }
             else
             {
@@ -578,7 +681,15 @@ int main()
                 continue;
             }
             //Check for decline to move to next customer
-            if (diaChoiceMain == "No") { continue; }
+            if (diaChoiceMain == "No")
+            { 
+                //Declined message
+                diaObj.writeDialouge(currCustomer->getDdeclined(), false, true);
+                //Lower players reputation
+                diaObj.writeDialouge("You lost reputation: -1", true, false);
+                playerStats->setRep(playerStats->getRep() - 1);
+                continue; 
+            }
 
             //Order was taken start a customer time in a different thread
             CustomerTimer localCustTimer;
@@ -655,7 +766,7 @@ int main()
             }
             else
             {
-                //Failed...
+                //Horrible food gread
                 diaObj.writeDialouge(currCustomer->getDOrderBad(), true, true);
 
                 //Rep
@@ -703,7 +814,53 @@ int main()
                 if (gameResult == 1)
                 {
                     //Passed quota
+                    gameStats->setDay(gameStats->getDay() + 1);
+                    gameStats->setEarnings(0);
+                    gameStats->setQuota(generateQuota(gameStats->getDay()));
                     diaObj.writeDialouge("The quota has been reached!", true, true);
+                    diaObj.writeDialouge("You head home and rest, getting ready to do it all over again tomorrow...", true, true);
+                    diaObj.writeDialouge("Options: Save Game | Continue | Exit", false, true);
+                    do
+                    {
+                        diaObj.askUserChoice(diaChoiceMain);
+                        if (diaChoiceMain == "Continue"  || diaChoiceMain == "Exit")
+                        {
+                            break;
+                        }
+                        else if (diaChoiceMain == "Save Game")
+                        {
+
+                            if (!saveGame(diaObj, gameStats, playerStats, inventoryManager))
+                            {
+                                diaObj.writeDialouge("File operation failed!", true, true);
+                            }
+                            //Save success, loop
+                        }
+
+                    } while (true);
+
+                    //Back in main game 
+                    if (diaChoiceMain == "Continue")
+                    {
+                        
+
+                        //Same as retry, but things are increased, me when redundant code
+                        setBaseStats(gameStats, playerStats, inventoryManager);
+
+                        //Stocking phase
+                        enterStockingPhase(diaObj, gameStats, playerStats, inventoryManager);
+
+                        gameResult = -1;
+
+                        timeClass.restartTime = true;
+                        continue;
+                        //Same as retry, me when redundant code
+                    }
+                    else if (diaChoiceMain == "Exit")
+                    {
+                        diaObj.writeDialouge("See you next time!", true, true);
+                        return 1;
+                    }
                 }
                 else if (gameResult == 2)
                 {
@@ -718,7 +875,7 @@ int main()
                         {
                             break;
                         }
-                    } while (diaChoiceMain != "Exit" || diaChoiceMain != "Retry");
+                    } while (true);
 
                     if (diaChoiceMain == "Exit")
                     {
@@ -731,15 +888,17 @@ int main()
                         //Retry
                         //Assign base stats and restart timer, set gameresult to -1, continue
 
-                        gameStats->setDay(baseDay);
-                        gameStats->setEarnings(baseEarnings);
-                        playerStats->setExp(baseExp);
-                        playerStats->setGold(baseGold);
-                        playerStats->setProf(baseProf);
-                        playerStats->setRep(baseRep);
-                        inventoryManager.setWaterStock(baseWater);
-                        inventoryManager.setBreadStock(baseBread);
-                        inventoryManager.setFishStock(baseFish);
+                        gameStats->setDay(baseStats.baseDay);
+                        gameStats->setEarnings(baseStats.baseEarnings);
+
+                        playerStats->setExp(baseStats.baseExp);
+                        playerStats->setGold(baseStats.baseGold);
+                        playerStats->setProf(baseStats.baseProf);
+                        playerStats->setRep(baseStats.baseRep);
+
+                        inventoryManager.setWaterStock(baseStats.baseWater);
+                        inventoryManager.setBreadStock(baseStats.baseBread);
+                        inventoryManager.setFishStock(baseStats.baseFish);
 
                         //Stocking phase
                         enterStockingPhase(diaObj, gameStats, playerStats, inventoryManager);
