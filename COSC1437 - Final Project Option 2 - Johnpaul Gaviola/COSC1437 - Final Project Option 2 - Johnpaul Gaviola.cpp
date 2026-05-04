@@ -329,7 +329,7 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
         }
         else if (diaChoiceLocal == "Cola")
         {
-            if (inventoryManager.getBreadStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
+            if (inventoryManager.getColaStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Cola* tempCola = new Cola;
             tempCola->prepareItem(playerStats);
             prepOrder.push_back(tempCola);
@@ -552,7 +552,7 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
            inBuy = true;
            if (playerStats->getExp() >= inventoryManager.getHamExp())
            {
-               cost = (inventoryManager.getWaterPrice() * localStockChoice);
+               cost = (inventoryManager.getHamPrice() * localStockChoice);
                if (playerStats->getGold() >= cost)
                {
                    inventoryManager.addHamStock(localStockChoice);
