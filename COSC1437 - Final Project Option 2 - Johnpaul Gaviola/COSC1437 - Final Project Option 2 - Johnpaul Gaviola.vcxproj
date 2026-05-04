@@ -130,26 +130,35 @@
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp" />
     <ClCompile Include="Customer.cpp" />
     <ClCompile Include="DialougeClass.cpp" />
+    <ClCompile Include="FireOutBreak.h" />
     <ClCompile Include="GameStats.cpp" />
     <ClCompile Include="GameStats.h" />
+    <ClCompile Include="Ham.h" />
+    <ClCompile Include="HigherResident.h" />
+    <ClCompile Include="PasserBy.h" />
+    <ClCompile Include="SuperHighResident.h" />
+    <ClCompile Include="WaterDonator.h" />
     <ClCompile Include="OrderItem.cpp" />
     <ClCompile Include="PlayerStats.cpp" />
+    <ClCompile Include="TavernFight.h" />
     <ClCompile Include="TimeClass.cpp" />
     <ClCompile Include="TimeClass.h" />
     <ClCompile Include="TownResident.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bread.h" />
+    <ClInclude Include="Cola.h" />
     <ClInclude Include="Customer.h" />
     <ClInclude Include="CustomerTimer.h" />
     <ClInclude Include="DialougeClass.h" />
     <ClInclude Include="ElapsedTime.h" />
+    <ClInclude Include="EventClass.h" />
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="Fish.h" />
     <ClInclude Include="Ingis.h" />
     <ClInclude Include="InventoryManager.h" />
     <ClInclude Include="OrderItem.h" />
     <ClInclude Include="PlayerStats.h" />
-    <ClInclude Include="TavernMain.h" />
     <ClInclude Include="Water.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

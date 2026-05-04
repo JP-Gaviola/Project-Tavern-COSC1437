@@ -7,13 +7,13 @@
 #include "PlayerStats.h"
 using namespace std;
 
-class Water : public OrderItem {
+class Cola : public OrderItem {
 public:
-	Water()
+	Cola()
 	{
-		itemName = "Water";
+		itemName = "Cola";
 		ExpNeeded = 0;
-		cost = 1;
+		cost = 5;
 	}
 	//Remember to return the rating and check accordingly!
 	void prepareItem(PlayerStats* playerStats)
@@ -32,14 +32,14 @@ public:
 		diaObj.writeDialouge("A cup is grabbed..", false, true);
 
 		//2
-		diaObj.writeDialouge("Type this out: pour water", false, true);
-		checkPhrase = "pour water";
+		diaObj.writeDialouge("Type this out: pouringVeryFizzyColaaaa z.z.z.z", false, true);
+		checkPhrase = "pouringVeryFizzyColaaaa z.z.z.z";
 		diaObj.askUserChoice(userInp);
 		if (userInp == checkPhrase)
 		{
 			passedChecks--;
 		}
-		diaObj.writeDialouge("Water is poured into the cup and placed on the order tray.", false, true);
+		diaObj.writeDialouge("Cola is poured into the cup and placed on the order tray.", false, true);
 
 		int total = 100 / passedChecks;
 		itemScore = total;

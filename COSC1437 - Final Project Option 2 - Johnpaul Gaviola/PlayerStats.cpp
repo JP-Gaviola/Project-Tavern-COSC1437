@@ -6,8 +6,8 @@ using namespace std;
 PlayerStats::PlayerStats()
 {
 	Exp = 0;
-	Gold = 50;
-	Reputation = 0;
+	Gold = 200;
+	Reputation = 1;
 	Proficiency = 0;
 }
 

@@ -1,4 +1,5 @@
 #include "TimeClass.h"
+#include "GameStats.h"
 #include <string>
 #include <chrono>   // For duration
 #include <thread>   // For sleep_for
@@ -14,7 +15,7 @@ TimeClass::TimeClass()
 	restartTime = false;
 }
 
-void TimeClass::startTime()
+void TimeClass::startTime(GameStats* gameStats)
 {
 	//Run in a seperate thread
 	//Reset
@@ -45,6 +46,16 @@ void TimeClass::startTime()
 			timeActive = true;
 			reachedEnd = false;
 			restartTime = false;
+		}
+
+		//Happy hour is 17:00
+		if (Hour == 17)
+		{
+			gameStats->changeHappyHour(true);
+		}
+		else
+		{
+			gameStats->changeHappyHour(false);
 		}
 	}
 }

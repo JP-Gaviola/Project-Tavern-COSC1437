@@ -19,18 +19,23 @@
 #include "ElapsedTime.h"
 #include "CustomerTimer.h"
 #include "InventoryManager.h"
-
+#include "EventManager.h"
 
 ///Order Items
 #include "OrderItem.h"
 #include "Water.h"
 #include "Bread.h"
 #include "Fish.h"
+#include "Cola.h"
+#include "Ham.h"
 
 ///Customers
 #include "Customer.h"
 #include "TownResident.h"
 #include "Ingis.h"
+#include "PasserBy.h"
+#include "HigherResident.h"
+#include "SuperHighResident.h"
 
 using namespace std;
 
@@ -45,8 +50,10 @@ struct {
     int baseProf;
     //Stock
     int baseWater;
+    int baseCola;
     int baseBread;
     int baseFish;
+    int baseHam;
 } baseStats;
 
 int generateQuota(int day)
@@ -84,6 +91,12 @@ void endTime(TimeClass& timeClass, thread& t1)
     t1.detach();
 }
 
+int randNum(int from, int to)
+{
+    //Math rand with seed on current system time 
+    return rand() % to + from; //1 to 2
+}
+
 void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, TimeClass& timeClass)
 {
     diaObj.writeDialouge("////////////////Game Stats///////////////////", false, false);
@@ -91,7 +104,12 @@ void printStatus(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStat
     diaObj.writeDialouge("Quota: " + to_string(gameStats->getQuota()), false, false);
     diaObj.writeDialouge("Today's Earnings: " + to_string(gameStats->getEarnings()), false, false);
     diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
-    diaObj.writeDialouge("Happy Hour: " + to_string(gameStats->checkHappyHour()), false, false);
+    string happyStatus = "No";
+    if (gameStats->checkHappyHour())
+    {
+        happyStatus = "Yes";
+    }
+    diaObj.writeDialouge("Happy Hour: " + happyStatus, false, false);
     diaObj.writeDialouge("////////////////Player Stats/////////////////", false, false);
     diaObj.writeDialouge("Total Money: " + to_string(playerStats->getGold()), false, false);
     diaObj.writeDialouge("Experience: " + to_string(playerStats->getExp()), false, false);
@@ -111,14 +129,25 @@ void printOrder(Dialouge& diaObj ,vector<OrderItem*> currentOrder)
     diaObj.writeDialouge("///////////ORDER///////////", false, false);
 }
 
-void selectRandomCustomer(Customer*& baseCust, int playerRep)
+void selectRandomCustomer(Customer*& baseCust, int playerRep, GameStats* gameStats)
 {
     if (baseCust != nullptr) { delete baseCust; baseCust = nullptr; }
 
-        //Math rand with seed on current system time 
-        srand(time(0));
+    int randomNum;
 
-        int randomNum = std::rand() % 2 + 1; //1 to 2
+    if (gameStats->getDay() == 0)
+    {
+        randomNum = randNum(1, 2);
+    }
+    else if (gameStats->getDay() == 1)
+    {
+        randomNum = randNum(1, 3);
+    }
+    else
+    {
+        randomNum = randNum(1, 5);
+    }
+
 
         switch (randomNum) {
         case 1:
@@ -126,6 +155,15 @@ void selectRandomCustomer(Customer*& baseCust, int playerRep)
             break;
         case 2:
             baseCust = new Ingis;
+            break;
+        case 3:
+            baseCust = new PasserBy;
+            break;
+        case 4:
+            baseCust = new HigherResident;
+            break;
+        case 5:
+            baseCust = new SuperHighResident;
             break;
         }
    
@@ -147,21 +185,32 @@ OrderItem* stringToOrderItem(string inp)
         newItem = new Fish;
         
     }
+    else if (inp == "Cola")
+    {
+        newItem = new Cola;
+
+    }
+    else if (inp == "Ham")
+    {
+        newItem = new Ham;
+
+    }
     return newItem;
 }
 
-void createOrder(Customer*& currCustomer, int playerExp, vector<OrderItem*>& order)
+
+void createOrder(Customer*& currCustomer, int playerExp, vector<OrderItem*>& order, GameStats* gameStats)
 {
     int PrefCosts = 0;
     int budget = currCustomer->getBudget();
+    OrderItem* currentItem;
     //Add preferences first if they pass the exp check 
     for (int i = 0; i < currCustomer->getPrefSize(); i++)
     {
-        OrderItem* currentItem = stringToOrderItem(currCustomer->getPrefAt(i));
+        currentItem = stringToOrderItem(currCustomer->getPrefAt(i));
         
         if (currentItem->getExpNeeded() <= playerExp)
         {
-            
             
             PrefCosts += currentItem->getCost();
             
@@ -174,10 +223,35 @@ void createOrder(Customer*& currCustomer, int playerExp, vector<OrderItem*>& ord
 
 
 
-    //ADDLATER Add one random item if to order if not strictly preferences / exp req is met 
+    //ADDLATER Add one random item if to order based on day amount capped at 3, only bread or water / basic item
     if (currCustomer->getOnlyPref() == false)
     {
+        int amtAdd = gameStats->getDay();
+        if (amtAdd > 3) { amtAdd = 3; }
+        if (amtAdd == 0) { return; }
 
+        for (int i = 0; i < amtAdd; i++)
+        {
+            switch (randNum(1, 3))
+            {
+            case 1:
+                currentItem = stringToOrderItem("Water");
+                if (currentItem->getCost() > budget) { return; }
+                order.push_back(currentItem);
+                break;
+            case 2:
+                
+                currentItem = stringToOrderItem("Bread");
+                if (currentItem->getCost() > budget) { return; }
+                order.push_back(currentItem);
+                break;
+            case 3:
+                currentItem = stringToOrderItem("Cola");
+                if (currentItem->getCost() > budget) { return; }
+                order.push_back(currentItem);
+                break;
+            }
+        }
     }
 }
 
@@ -235,8 +309,10 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
 
         diaObj.writeDialouge("What item would you like to prepare/do?", false, true);
         string optionList = "Water(S:" + to_string(inventoryManager.getWaterStock());
+        optionList += ") - Cola(S:" + to_string(inventoryManager.getColaStock());
         optionList += ") - Bread(S:" + to_string(inventoryManager.getBreadStock());
         optionList += ") - Fish(S:" + to_string(inventoryManager.getFishStock());
+        optionList += ") - Ham(S:" + to_string(inventoryManager.getHamStock());
         optionList += ") -  Submit Order - Remove Item - View Order";
 
         diaObj.writeDialouge(optionList, false, false);
@@ -247,15 +323,23 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
             //Stock check 
             if (inventoryManager.getWaterStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Water* tempWater = new Water;
-            tempWater->prepareItem();
+            tempWater->prepareItem(playerStats);
             prepOrder.push_back(tempWater);
             inventoryManager.addWaterStock(-1);
+        }
+        else if (diaChoiceLocal == "Cola")
+        {
+            if (inventoryManager.getBreadStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
+            Cola* tempCola = new Cola;
+            tempCola->prepareItem(playerStats);
+            prepOrder.push_back(tempCola);
+            inventoryManager.addColaStock(-1);
         }
         else if (diaChoiceLocal == "Bread")
         {
             if (inventoryManager.getBreadStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Bread* tempBread = new Bread;
-            tempBread->prepareItem();
+            tempBread->prepareItem(playerStats);
             prepOrder.push_back(tempBread);
             inventoryManager.addBreadStock(-1);
         }
@@ -264,9 +348,18 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
             if (inventoryManager.getFishStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
             Fish* tempFish = new Fish;
             
-            tempFish->prepareItem();
+            tempFish->prepareItem(playerStats);
             prepOrder.push_back(tempFish);
             inventoryManager.addFishStock(-1);
+        }
+        else if (diaChoiceLocal == "Ham")
+        {
+            if (inventoryManager.getHamStock() <= 0) { diaObj.writeDialouge("Not enough stock!", true, true); continue; }
+            Ham* tempHam = new Ham;
+
+            tempHam->prepareItem(playerStats);
+            prepOrder.push_back(tempHam);
+            inventoryManager.addHamStock(-1);
         }
 
 
@@ -330,6 +423,10 @@ int askSelectOrder(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerSt
     //Final score
     double finalScore = M * A;
 
+    //Event 
+    EventManager tempEvent;
+    tempEvent.pickOneRandomEvent(diaObj, gameStats, playerStats, inventoryManager);
+
     return finalScore;
 
 }
@@ -366,12 +463,16 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
        diaObj.writeDialouge("Proficency: " + to_string(playerStats->getProf()), false, false);
        diaObj.writeDialouge("//////////////Tavern Supply Co.///////////////", false, false);
        diaObj.writeDialouge("Water : Price: " + to_string(inventoryManager.getWaterPrice()), false, false);
+       diaObj.writeDialouge("Cola : Price: " + to_string(inventoryManager.getColaPrice()), false, false);
        diaObj.writeDialouge("Bread : Price: " + to_string(inventoryManager.getBreadPrice()), false, false);
        diaObj.writeDialouge("Fish : Price: " + to_string(inventoryManager.getFishPrice()) + " : Exp: " + to_string(inventoryManager.getFishExp()), false, false);
+       diaObj.writeDialouge("Ham : Price: " + to_string(inventoryManager.getHamPrice()) + " : Exp: " + to_string(inventoryManager.getHamExp()), false, false);
        diaObj.writeDialouge("//////////////Store Inventory/////////////////", false, false);
        diaObj.writeDialouge("Water : " + to_string(inventoryManager.getWaterStock()), false, false);
+       diaObj.writeDialouge("Cola : " + to_string(inventoryManager.getColaStock()), false, false);
        diaObj.writeDialouge("Bread : " + to_string(inventoryManager.getBreadStock()), false, false);
        diaObj.writeDialouge("Fish : " + to_string(inventoryManager.getFishStock()), false, false);
+       diaObj.writeDialouge("Ham : " + to_string(inventoryManager.getHamStock()), false, false);
        diaObj.writeDialouge("//////////////////////////////////////////////", false, false);
        diaObj.writeDialouge("Type the item you would like to stock up on. Type 'Finish' when ready to move on!", false, true);
        //For Cant afford noti
@@ -392,6 +493,19 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
            if (playerStats->getGold() >= cost)
            {
                inventoryManager.addWaterStock(localStockChoice);
+           }
+           else
+           {
+               couldntAfford = true;
+           }
+       }
+       else if (localDiaChoice == "Cola")
+       {
+           inBuy = true;
+           cost = (inventoryManager.getColaPrice() * localStockChoice);
+           if (playerStats->getGold() >= cost)
+           {
+               inventoryManager.addColaStock(localStockChoice);
            }
            else
            {
@@ -429,8 +543,31 @@ void enterStockingPhase(Dialouge& diaObj, GameStats* gameStats, PlayerStats* pla
            else
            {
                diaObj.writeDialouge("Not enough Experience!", true, true);
+               continue;
            }
           
+       }
+       else if (localDiaChoice == "Ham")
+       {
+           inBuy = true;
+           if (playerStats->getExp() >= inventoryManager.getHamExp())
+           {
+               cost = (inventoryManager.getWaterPrice() * localStockChoice);
+               if (playerStats->getGold() >= cost)
+               {
+                   inventoryManager.addHamStock(localStockChoice);
+               }
+               else
+               {
+                   couldntAfford = true;
+               }
+           }
+           else
+           {
+               diaObj.writeDialouge("Not enough Experience!", true, true);
+               continue;
+           }
+
        }
        if (inBuy)
        {
@@ -470,8 +607,10 @@ bool saveGame(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, 
         saveFile << playerStats->getProf() << endl;
         //Stock
         saveFile << inventoryManager.getWaterStock() << endl;
+        saveFile << inventoryManager.getColaStock() << endl;
         saveFile << inventoryManager.getBreadStock() << endl;
         saveFile << inventoryManager.getFishStock() << endl;
+        saveFile << inventoryManager.getHamStock() << endl;
 
         saveFile.close();
 
@@ -520,9 +659,13 @@ bool loadGame(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, 
         getline(dataFile, tempstr);
         inventoryManager.setWaterStock(convertStringtoInt(tempstr)); //Water
         getline(dataFile, tempstr);
+        inventoryManager.setColaStock(convertStringtoInt(tempstr)); //Cola
+        getline(dataFile, tempstr);
         inventoryManager.setBreadStock(convertStringtoInt(tempstr)); //Bread
         getline(dataFile, tempstr);
         inventoryManager.setFishStock(convertStringtoInt(tempstr)); //Fish
+        getline(dataFile, tempstr);
+        inventoryManager.setHamStock(convertStringtoInt(tempstr)); //Ham
 
         dataFile.close();
 
@@ -551,12 +694,15 @@ void setBaseStats(GameStats* gameStats, PlayerStats* playerStats, InventoryManag
     baseStats.baseProf = playerStats->getProf();
     //Stock
     baseStats.baseWater = inventoryManager.getWaterStock();
+    baseStats.baseCola = inventoryManager.getColaStock();
     baseStats.baseBread = inventoryManager.getBreadStock();
     baseStats.baseFish = inventoryManager.getFishStock();
+    baseStats.baseHam = inventoryManager.getHamStock();
 }
 
 int main()
 {
+    srand(time(0));
     //Menu sequence////////////////////////////////////////////////////////////////////
     string userChoice = "";
     Dialouge diaObj;
@@ -641,7 +787,7 @@ int main()
     diaObj.writeDialouge("Let's do this!", false, true);
 
     //Start main game time in a different thread
-    thread t1(&TimeClass::startTime, &timeClass);
+    thread t1(&TimeClass::startTime, &timeClass, gameStats);
     
 
     //Gameplay loop 
@@ -655,7 +801,7 @@ int main()
             printStatus(diaObj, gameStats, playerStats, timeClass);
             Customer* currCustomer = nullptr;
             
-            selectRandomCustomer(currCustomer, playerStats->getRep());
+            selectRandomCustomer(currCustomer, playerStats->getRep(), gameStats);
              
             diaObj.writeDialouge("The Tavern door swings open...", true, true);
 
@@ -689,6 +835,7 @@ int main()
                 //Lower players reputation
                 diaObj.writeDialouge("You lost reputation: -1", true, false);
                 playerStats->setRep(playerStats->getRep() - 1);
+
                 continue; 
             }
 
@@ -698,7 +845,7 @@ int main()
 
            
             //Creates a order
-            createOrder(currCustomer, playerStats->getExp(), currentOrder);
+            createOrder(currCustomer, playerStats->getExp(), currentOrder, gameStats);
             //Print time
             diaObj.writeDialouge("Current Time: " + getTime(timeClass), false, false);
 
@@ -715,6 +862,19 @@ int main()
             //Order submitted
             //Tips
             int tips = 0;
+
+            //Happy Hour
+            if (timeClass.Hour == 17)
+            {
+                diaObj.writeDialouge("Happy Hour is active!! Tips are greatly increased!", true, true);
+                tips += 10;
+                gameStats->changeHappyHour(true);
+            }
+            else
+            {
+                gameStats->changeHappyHour(false);
+            }
+
             //End timer
             localCustTimer.timeActive = false;
             int waitTime = localCustTimer.elapsed;
@@ -779,10 +939,13 @@ int main()
                 playerStats->setExp(playerStats->getExp() + 2);
             }
 
-            //Give player the earnings
+            //Give player the earnings + markup
             for (int i = 0; i < currentOrder.size(); i++)
             {
-                localEarnings += currentOrder[i]->getCost();
+
+                localEarnings += currentOrder[i]->getCost() + (currentOrder[i]->getCost()*0.8);
+                
+
             }
 
             if (orderGrade <= 0) { localEarnings = 0; }
@@ -815,6 +978,9 @@ int main()
                 if (gameResult == 1)
                 {
                     //Passed quota
+                    //Reset rep if zero
+                    if (playerStats->getRep() <= 0) { playerStats->setRep(10); }
+
                     gameStats->setDay(gameStats->getDay() + 1);
                     gameStats->setEarnings(0);
                     gameStats->setQuota(generateQuota(gameStats->getDay()));
@@ -898,8 +1064,10 @@ int main()
                         playerStats->setRep(baseStats.baseRep);
 
                         inventoryManager.setWaterStock(baseStats.baseWater);
+                        inventoryManager.setColaStock(baseStats.baseCola);
                         inventoryManager.setBreadStock(baseStats.baseBread);
                         inventoryManager.setFishStock(baseStats.baseFish);
+                        inventoryManager.setHamStock(baseStats.baseHam);
 
                         //Stocking phase
                         enterStockingPhase(diaObj, gameStats, playerStats, inventoryManager);

@@ -13,7 +13,7 @@ public:
 		//Set stats here
 		customerName = "Town Resident";
 		patienceLevel = 60; //Allowed ellapsed time without penalty 
-		budget = 10; //max amount of money to be ordered 
+		budget = 20; //max amount of money to be ordered 
 		minRep = -999; //Minimum rep to accept order 
 
 		prefSize = 2; //Pref size

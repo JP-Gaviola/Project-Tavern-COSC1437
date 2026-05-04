@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "PlayerStats.h"
 using namespace std;
 
 //Can be a drink or food 
@@ -14,7 +15,7 @@ protected:
 
 public:
 	//Code the custom minigame here
-	virtual void prepareItem() = 0; //override this 
+	virtual void prepareItem(PlayerStats*) = 0; //override this 
 	
 	int getItemScore();
 	int getStock();

@@ -28,6 +28,9 @@
     <Filter Include="Customers">
       <UniqueIdentifier>{16ee10e1-dfae-4138-bd0f-590fe4a3f545}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{2101d162-0f8b-43ed-89b8-b7ea2a91440b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COSC1437 - Final Project Option 2 - Johnpaul Gaviola.cpp">
@@ -60,6 +63,27 @@
     <ClCompile Include="TownResident.h">
       <Filter>Customers</Filter>
     </ClCompile>
+    <ClCompile Include="TavernFight.h">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterDonator.h">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="FireOutBreak.h">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Ham.h">
+      <Filter>OrderItems\Food</Filter>
+    </ClCompile>
+    <ClCompile Include="HigherResident.h">
+      <Filter>Customers</Filter>
+    </ClCompile>
+    <ClCompile Include="SuperHighResident.h">
+      <Filter>Customers</Filter>
+    </ClCompile>
+    <ClCompile Include="PasserBy.h">
+      <Filter>Customers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DialougeClass.h">
@@ -69,9 +93,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PlayerStats.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TavernMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Water.h">
@@ -94,6 +115,18 @@
     </ClInclude>
     <ClInclude Include="CustomerTimer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EventClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EventManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cola.h">
+      <Filter>OrderItems\Drinl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
