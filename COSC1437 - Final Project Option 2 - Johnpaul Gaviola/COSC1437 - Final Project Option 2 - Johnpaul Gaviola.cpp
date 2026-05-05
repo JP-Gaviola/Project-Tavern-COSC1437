@@ -59,8 +59,8 @@ struct {
 int generateQuota(int day)
 {
     int baseQuota = (day * 10) + 20;
-    //return (baseQuota) + (baseQuota * 0.5);
-    return 5 + day; // for debug
+    return (baseQuota) + (baseQuota * 0.5);
+    //return 5 + day; // for debug
 }
 
 string getTime(TimeClass& timeClass)
