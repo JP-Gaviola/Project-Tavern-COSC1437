@@ -59,8 +59,8 @@ struct {
 int generateQuota(int day)
 {
     int baseQuota = (day * 10) + 20;
-    return (baseQuota) + (baseQuota * 0.5);
-    //return 5 + day; // for debug
+    //return (baseQuota) + (baseQuota * 0.5);
+    return 5 + day; // for debug
 }
 
 string getTime(TimeClass& timeClass)
@@ -862,12 +862,14 @@ int main()
             //Order submitted
             //Tips
             int tips = 0;
+            int baseOrderGrade = 70;
 
             //Happy Hour
             if (timeClass.Hour == 17)
             {
-                diaObj.writeDialouge("Happy Hour is active!! Tips are greatly increased!", true, true);
+                diaObj.writeDialouge("Happy Hour is active!! Tips are greatly increased and customers are less rowdy!", true, true);
                 tips += 10;
+                baseOrderGrade -= 20;
                 gameStats->changeHappyHour(true);
             }
             else
@@ -888,7 +890,7 @@ int main()
             //Score above 70 is passing 
             int localEarnings = 0;
 
-            if (orderGrade >= 70)
+            if (orderGrade >= baseOrderGrade + currCustomer->getRowdiness())
             {
                 //Passed!!!
                 //Check wait time 

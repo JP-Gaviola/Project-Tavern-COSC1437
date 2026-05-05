@@ -14,14 +14,18 @@ public:
 	void eventMain(Dialouge& diaObj, GameStats* gameStats, PlayerStats* playerStats, InventoryManager& inventoryManager)
 	{
 		//Negative event
-		diaObj.writeDialouge(eventText, true, true);
+		diaObj.writeDialouge(eventText, false, true);
 
 		string diaChoice;
 		
 		do
 		{
 			diaObj.askUserChoice(diaChoice);
-		} while (diaChoice != "Yes" || diaChoice != "No");
+			if (diaChoice != "Yes" || diaChoice != "No")
+			{
+				break;
+			}
+		} while (true);
 
 		if (diaChoice == "Yes")
 		{

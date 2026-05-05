@@ -15,6 +15,7 @@ public:
 		patienceLevel = 90; //Allowed ellapsed time without penalty 
 		budget = 100; //max amount of money to be ordered 
 		minRep = 45; //Minimum rep to accept order 
+		rowdiness = 20; //Grade req increase
 
 		prefSize = 2; //Pref size
 		pref = new string[prefSize]{ "Ham", "Fish" }; //Prefered Items 

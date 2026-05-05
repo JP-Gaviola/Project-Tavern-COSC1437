@@ -37,7 +37,7 @@ void TimeClass::startTime(GameStats* gameStats)
 		{
 			Min += 1;
 		}
-		this_thread::sleep_for(chrono::milliseconds(500)); //500 mili = 6 minutes per day 
+		this_thread::sleep_for(chrono::milliseconds(1)); //500 mili = 6 minutes per day 
 
 		if (restartTime)
 		{
